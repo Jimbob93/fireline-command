@@ -410,7 +410,7 @@ const u=units[i],container=$('units');
 let b=container.children[i];
 if(!b){b=document.createElement('button');b.type='button';b.dataset.unit=i;b.onclick=(event)=>{selectUnits([i],event.shiftKey);refreshUI()};container.appendChild(b)}
 b.className='unit'+(selectedGroup.has(i)?' active':'');b.disabled=u.health<=0;b.setAttribute('aria-pressed',selectedGroup.has(i));
-const status=u.health<=0?'Destroyed':u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({approach:'Returning to airport',landing:'Landing',parked:u.water<1?'Reloading on ground':'Parked at airport',takeoff:'Taking off'}[u.airportStage]):({auto:'Auto response',perimeter:'Cutting perimeter',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling'}[u.mode]||'Available');
+const status=u.health<=0?'Destroyed':u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<1?'Reloading on ground':'Parked at airport',ready:'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to parking',takeoff:'Taking off'}[u.airportStage]):({auto:'Auto response',perimeter:'Cutting perimeter',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling'}[u.mode]||'Available');
 const value=u.type==='tanker'?(u.water>=1?'Loaded':'Reloading'):u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
 const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
 if(b.innerHTML!==html)b.innerHTML=html;
@@ -860,10 +860,50 @@ function updateAirportTanker(u,dt,perks,hasFire){
     return dist(u.x,u.y,x,y)<.01;
   };
   let stage=u.airportStage||'flight';
+  const runwayStages=['approach','landing','parked','takeoff','taxiOut','taxiPark'];
+  const peers=units.filter(v=>v!==u&&v.health>0&&v.type==='tanker'&&v.homeBase===base);
+  const runwayBusy=()=>peers.some(v=>runwayStages.includes(v.airportStage));
+  const wantsFlight=()=>hasFire||['attack','move','defend'].includes(u.mode);
+  const queue=()=>{if(u.runwayQueuedAt==null)u.runwayQueuedAt=elapsed;};
+  const firstInQueue=()=>!peers.some(v=>v.runwayQueuedAt!=null&&
+    (v.runwayQueuedAt<u.runwayQueuedAt||(v.runwayQueuedAt===u.runwayQueuedAt&&units.indexOf(v)<units.indexOf(u))));
+  const parkingX=base.x+(u.airportBay===1?1:-1)*2*C,parkingY=base.y-C;
+  const hold=()=>{
+    const radius=100;
+    const cx=Math.max(radius+5,Math.min(W-radius-5,base.x));
+    const cy=Math.max(radius+5,Math.min(H-radius-5,base.y));
+    const angle=Math.atan2(u.y-cy,u.x-cx);
+    const ahead=dist(u.x,u.y,cx,cy)>radius+18?0:.32;
+    travel(cx+Math.cos(angle+ahead)*radius,cy+Math.sin(angle+ahead)*radius,perks.speed);
+  };
   if(stage==='flight'&&!u.tankerRun&&(u.water<1||u.mode==='refill'||(!hasFire&&!['attack','move','defend'].includes(u.mode)))){
     u.airportMission={mode:'auto',tx:base.x,ty:base.y};
-    u.airportStage=stage='approach';u.tankerOrbit=null;
-    msg(u.name+' returning to airport.');
+    u.airportStage=stage='holding';u.tankerOrbit=null;queue();
+    msg(u.name+' waiting for airport runway clearance.');
+  }
+  if(stage==='holding'){
+    queue();
+    if(!runwayBusy()&&firstInQueue()){
+      u.runwayQueuedAt=null;u.airportStage='approach';
+      msg(u.name+' cleared to land.');
+    }else hold();
+    return;
+  }
+  if(stage==='ready'){
+    if(!wantsFlight()){u.runwayQueuedAt=null;return;}
+    queue();
+    if(!runwayBusy()&&firstInQueue()){
+      u.runwayQueuedAt=null;u.airportStage='taxiOut';
+    }
+    return;
+  }
+  if(stage==='taxiOut'){
+    if(travel(base.x,base.y,perks.speed*.25)){u.airportStage='takeoff';u.heading=0;msg(u.name+' cleared for takeoff.');}
+    return;
+  }
+  if(stage==='taxiPark'){
+    if(travel(parkingX,parkingY,perks.speed*.25)){u.airportStage='ready';u.heading=0;}
+    return;
   }
   if(stage==='approach'){
     if(travel(west-35,base.y,perks.speed))u.airportStage='landing';
@@ -879,8 +919,9 @@ function updateAirportTanker(u,dt,perks,hasFire){
   if(stage==='parked'){
     u.water=Math.min(u.capacity,u.water+dt*(rank(u)>=2?1/10:1/14));
     u.health=Math.min(100,u.health+dt*22);
-    if(u.water>=u.capacity&&(hasFire||['attack','move','defend'].includes(u.mode))){
-      u.airportStage='takeoff';msg(u.name+' taking off.');
+    if(u.water>=u.capacity){
+      if(wantsFlight()){u.airportStage='takeoff';msg(u.name+' taking off.');}
+      else u.airportStage='taxiPark';
     }
     return;
   }
@@ -1227,7 +1268,7 @@ function drawTankerSprite(u){
     ctx.lineTo(-11,19);ctx.lineTo(-5,19);ctx.lineTo(3,4);ctx.lineTo(12,4);
     ctx.quadraticCurveTo(19,4,21,0);ctx.closePath();
   };
-  ctx.save();ctx.translate(u.airportStage==='parked'?0:-5,u.airportStage==='parked'?1:7);shape();ctx.fillStyle='rgba(0,0,0,.23)';ctx.fill();ctx.restore();
+  ctx.save();ctx.translate(['parked','ready','taxiOut','taxiPark'].includes(u.airportStage)?0:-5,['parked','ready','taxiOut','taxiPark'].includes(u.airportStage)?1:7);shape();ctx.fillStyle='rgba(0,0,0,.23)';ctx.fill();ctx.restore();
   shape();ctx.fillStyle='#f3f1e8';ctx.fill();ctx.strokeStyle='#38464b';ctx.lineWidth=1.1;ctx.stroke();
   ctx.fillStyle='#c84235';ctx.fillRect(-10,-18,5,4);ctx.fillRect(-10,14,5,4);
   ctx.fillRect(-19,-2,26,4);
@@ -1438,7 +1479,7 @@ if(!base)return;
 const x=Math.floor(base.x/C),y=Math.floor(base.y/C);
 const unit=createUnit(spec.label+' '+(units.filter(u=>u.type===type).length+1),type,x,y);
 unit.homeBase=base;
-if(type==='tanker'){unit.airportStage='parked';unit.heading=0;}
+if(type==='tanker'){const bays=new Set(units.filter(v=>v.health>0&&v.type==='tanker'&&v.homeBase===base).map(v=>v.airportBay));unit.airportBay=bays.has(0)?1:0;unit.airportStage='ready';unit.heading=0;unit.x=base.x+(unit.airportBay===1?1:-1)*2*C;unit.y=base.y-C;unit.tx=unit.x;unit.ty=unit.y;}
 if(type==='helicopter'){const occupied=new Set(units.filter(u=>u.health>0&&u.type==='helicopter'&&u.homeBase===base).map(u=>u.helipad));unit.helipad=[-2,0,2].find(p=>!occupied.has(p))??0;unit.x=base.x+unit.helipad*C;unit.tx=unit.x;unit.y=base.y+C;unit.ty=unit.y;}
 funds-=cost;
 unitPurchases[type]=(unitPurchases[type]||0)+1;
