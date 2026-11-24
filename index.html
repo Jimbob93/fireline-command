@@ -81,8 +81,11 @@ button:focus-visible{outline:2px solid #ffd27c;outline-offset:2px}
   <summary>Response Units</summary>
   <div id="units"></div>
   <div id="xpStatus" class="tips"></div>
-</details><div class="panel"><h3>Incident Command</h3><p id="recruitStatus" class="tips">Build a Fire Station or Command HQ for ground units, or an Airport for aircraft.</p><div id="unitRoster" class="tips"></div><div class="actions"><button id="reinforce">🚒 Brush Engine · $250</button><button id="crew">👷 Crew · $160</button><button id="dozer">▰ Dozer · $320</button><button id="helicopter">🚁 Helicopter · $520</button><button id="tanker" class="wide">✈ Recruit Air Tanker · $760</button><button id="scooper">✈ Super Scooper</button><button id="heavy">🚁 Heavy Lift</button><button id="tender">🚛 Water Tender</button><button id="chief">🚙 Battalion Chief</button><button id="airattack" class="wide">✈ Air Attack</button><button id="airdrop" class="wide">✈ One-time Water Drop · $200</button></div><div class="tips" style="margin-top:10px">Air tanker: purchase, then tap the target area. Water tenders refill at roadside hydrants, water depots or riverbanks. Water units refill and return to base when fires are out. Damaged units return to a Fire Station for repairs. Ground units favor roads. Off-road travel is slower unless a dozer has cleared the ground. Automatic units prioritize fires threatening homes. Idle dozers cut perimeters around active fires. Helicopters carry four drops per standard tank. Use Suppress to target an air tanker pass. It flies across the wind and lays retardant along its flight path.</div></div><div class="panel"><h3>🏗 Base Construction</h3><div class="tips" style="margin-bottom:10px">Choose a building, then tap open land or a cut fireline on the map. Buildings generate revenue or improve your response.</div><div class="buildgrid" id="buildButtons"><button data-build="station">🏠 Fire Station<br><small id="stationCost">$300 · Recruitment &amp; repairs</small></button><button data-build="hq">🏢 Command HQ<br><small id="hqCost">$2,500 · +$5/sec base</small></button><button data-build="water">💧 Water Depot<br><small>$240 · refills nearby</small></button><button data-build="airport">✈ Airport<br><small>$1,500 · 7 × 3 tiles · aircraft base</small></button></div><div class="tips" id="buildStatus" style="margin-top:9px">Build a base to grow your operation.</div><button id="cancelBuild" style="width:100%;margin-top:8px" disabled>Cancel placement</button></div><div class="panel"><h3>Dispatch</h3><div class="log" id="log">Incident reported. Watch the wind arrow for the direction of spread.</div><div style="color:#adbfca;font-size:11px;margin-top:9px">WIND: <b id="wind">↗ NORTHEAST</b></div><div class="bar"><i id="riskbar" style="width:100%"></i></div><small id="status" style="color:#b3c2c7">Community survival: 12 structures standing</small></div><details class="panel tips win-guide"><summary>How to win</summary><div class="win-flow" aria-label="How to win flowchart"><div class="win-step win-goal"><b>Protect at least 8 of 12 homes</b><small>Keep the community standing</small></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-step"><b>Assess the fire</b><small>Check wind, terrain and threatened homes</small></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-branches"><div class="win-step"><b>Contain</b><small>Dozers and crews cut continuous lines</small></div><div class="win-step"><b>Suppress</b><small>Engines and aircraft attack flames</small></div></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-step"><b>Refill &amp; mop up</b><small>Supply water and extinguish remaining fires</small></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-step win-goal"><b>Next incident</b><small>Repeat while at least 8 homes survive</small></div></div><p><b>Fire behavior:</b> Fires persist until suppressed, even inside containment lines. Wind can carry embers over roads and firebreaks, including two-tile dozer lines at 30 mph or more. Grass spreads quickly; dense forest burns hotter and needs more water. Engines defend nearby structures; crews can cut firebreaks.</p><p><b>Controls:</b> Click a unit to select it, or left-click and drag a box to select multiple units. Shift-click adds or removes units. Orders affect all selected units. Left-click the map to issue the selected order (Suppress by default). Right-click to cut line. On touch, use the Orders buttons and tap the map. <kbd>1</kbd> Move <kbd>2</kbd> Suppress <kbd>3</kbd> Firebreak <kbd>4</kbd> Refill <kbd>Space</kbd> Pause.</p></details></div></div></div><script>
+</details><div class="panel"><h3>Incident Command</h3><p id="recruitStatus" class="tips">Build a Fire Station or Command HQ for ground units, or an Airport for aircraft.</p><div id="unitRoster" class="tips"></div><div class="actions"><button id="reinforce">🚒 Brush Engine · $250</button><button id="crew">👷 Crew · $160</button><button id="dozer">▰ Dozer · $320</button><button id="helicopter">🚁 Helicopter · $520</button><button id="tanker" class="wide">✈ Recruit Air Tanker · $760</button><button id="scooper">✈ Super Scooper</button><button id="heavy">🚁 Heavy Lift</button><button id="tender">🚛 Water Tender</button><button id="chief">🚙 Battalion Chief</button><button id="airattack" class="wide">✈ Air Attack</button></div><details class="advanced-recruit"><summary>Specialist resources</summary><div class="actions"><button id="type1">🚒 Type 1 Engine</button><button id="type3">🚒 Type 3 Engine</button><button id="hotshot">👷 Hotshot Crew</button><button id="heavydozer">▰ Type 1 Dozer</button><button id="investigator">🚙 Fire Investigator</button><button id="utility">🛻 Utility Truck</button><button id="mobilecommand">🚐 Mobile Command Unit</button><button id="vlat">✈ Very Large Air Tanker</button><button id="medical">🚑 Medical Unit</button></div></details><div class="actions" style="margin-top:7px"><button id="airdrop" class="wide">✈ One-time Water Drop · $200</button></div><div class="tips" style="margin-top:10px">Air tanker: purchase, then tap the target area. Water tenders refill at roadside hydrants, water depots or riverbanks. Water units refill and return to base when fires are out. Damaged units return to a Fire Station for repairs. Ground units favor roads. Off-road travel is slower unless a dozer has cleared the ground. Automatic units prioritize fires threatening homes. Idle dozers cut perimeters around active fires. Helicopters carry four drops per standard tank. Use Suppress to target an air tanker pass. It flies across the wind and lays retardant along its flight path.</div></div><div class="panel"><h3>🏗 Base Construction</h3><div class="tips" style="margin-bottom:10px">Choose a building, then tap open land or a cut fireline on the map. Buildings generate revenue or improve your response.</div><div class="buildgrid" id="buildButtons"><button data-build="station">🏠 Fire Station<br><small id="stationCost">$300 · Recruitment &amp; repairs</small></button><button data-build="hq">🏢 Command HQ<br><small id="hqCost">$2,500 · +$5/sec base</small></button><button data-build="water">💧 Water Depot<br><small>$240 · refills nearby</small></button><button data-build="airport">✈ Airport<br><small>$1,500 · 7 × 3 tiles · aircraft base</small></button></div><div class="tips" id="buildStatus" style="margin-top:9px">Build a base to grow your operation.</div><button id="cancelBuild" style="width:100%;margin-top:8px" disabled>Cancel placement</button></div><div class="panel"><h3>Dispatch</h3><div class="log" id="log">Incident reported. Watch the wind arrow for the direction of spread.</div><div style="color:#adbfca;font-size:11px;margin-top:9px">WIND: <b id="wind">↗ NORTHEAST</b></div><div class="bar"><i id="riskbar" style="width:100%"></i></div><small id="status" style="color:#b3c2c7">Community survival: 12 structures standing</small></div><details class="panel tips win-guide"><summary>How to win</summary><div class="win-flow" aria-label="How to win flowchart"><div class="win-step win-goal"><b>Protect at least 8 of 12 homes</b><small>Keep the community standing</small></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-step"><b>Assess the fire</b><small>Check wind, terrain and threatened homes</small></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-branches"><div class="win-step"><b>Contain</b><small>Dozers and crews cut continuous lines</small></div><div class="win-step"><b>Suppress</b><small>Engines and aircraft attack flames</small></div></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-step"><b>Refill &amp; mop up</b><small>Supply water and extinguish remaining fires</small></div><span class="win-arrow" aria-hidden="true">↓</span><div class="win-step win-goal"><b>Next incident</b><small>Repeat while at least 8 homes survive</small></div></div><p><b>Fire behavior:</b> Fires persist until suppressed, even inside containment lines. Wind can carry embers over roads and firebreaks, including two-tile dozer lines at 30 mph or more. Grass spreads quickly; dense forest burns hotter and needs more water. Engines defend nearby structures; crews can cut firebreaks.</p><p><b>Controls:</b> Click a unit to select it, or left-click and drag a box to select multiple units. Shift-click adds or removes units. Orders affect all selected units. Left-click the map to issue the selected order (Suppress by default). Right-click to cut line. On touch, use the Orders buttons and tap the map. <kbd>1</kbd> Move <kbd>2</kbd> Suppress <kbd>3</kbd> Firebreak <kbd>4</kbd> Refill <kbd>Space</kbd> Pause.</p></details></div></div></div><script>
 (()=>{'use strict';const canvas=document.querySelector('#map'),ctx=canvas.getContext('2d'),W=2000,H=1300,C=25,COLS=W/C,ROWS=H/C,TWO=Math.PI*2;const $=id=>document.getElementById(id);const types={engine:{label:"Brush Engine",icon:"🚒",cost:250,speed:67,capacity:100,range:105,power:.15,delay:.20},crew:{label:"Hand Crew",icon:"👷",cost:160,speed:48,capacity:65,range:65,power:.10,delay:.31},dozer:{label:"Dozer",icon:"▰",cost:320,speed:44,capacity:0,range:0,power:0,delay:1},helicopter:{label:"Helicopter",icon:"🚁",cost:520,speed:120,capacity:60,range:65,power:.24,delay:2.1},tanker:{label:"Air Tanker",icon:"✈️",cost:760,speed:140,capacity:1,range:35,power:.28,delay:15}};Object.assign(types,{scooper:{label:'Super Scooper',icon:'✈',cost:1200,speed:155,capacity:100,range:65,power:.42,delay:1.8},heavy:{label:'Heavy-lift Helicopter',icon:'🚁',cost:950,speed:105,capacity:120,range:75,power:.46,delay:2.1},tender:{label:'Water Tender',icon:'🚛',cost:450,speed:57,capacity:500,range:0,power:0,delay:1},chief:{label:'Battalion Chief',icon:'🚙',cost:600,speed:75,capacity:0,range:0,power:0,delay:1},airattack:{label:'Air Attack',icon:'✈',cost:850,speed:155,capacity:0,range:0,power:0,delay:1}});
+Object.assign(types,{"type1":{"role":"engine","label":"Type 1 Engine","icon":"🚒","cost":750,"speed":55,"capacity":200,"range":115,"power":0.25,"delay":0.2},"type3":{"role":"engine","label":"Type 3 Engine","icon":"🚒","cost":400,"speed":78,"capacity":130,"range":105,"power":0.19,"delay":0.2},"hotshot":{"role":"crew","label":"Hotshot Crew","icon":"👷","cost":500,"speed":58,"capacity":80,"range":75,"power":0.17,"delay":0.25},"heavydozer":{"role":"dozer","label":"Type 1 Dozer","icon":"▰","cost":800,"speed":62,"capacity":0,"range":0,"power":0,"delay":1},"investigator":{"role":"investigator","label":"Fire Investigator","icon":"🚙","cost":350,"speed":70,"capacity":0,"range":0,"power":0,"delay":1},"utility":{"role":"utility","label":"Utility Truck","icon":"🛻","cost":300,"speed":65,"capacity":0,"range":0,"power":0,"delay":1},"mobilecommand":{"role":"chief","label":"Mobile Command Unit","icon":"🚐","cost":1500,"speed":48,"capacity":0,"range":0,"power":0,"delay":1},"vlat":{"role":"tanker","label":"Very Large Air Tanker","icon":"✈","cost":2500,"speed":165,"capacity":2,"range":50,"power":0.45,"delay":15},"medical":{"role":"medical","label":"Medical Unit","icon":"🚑","cost":450,"speed":72,"capacity":0,"range":0,"power":0,"delay":1}});
+const unitSpec=u=>types[u.model||u.type]||types[u.type];
+const isFieldSupport=u=>['investigator','utility','medical'].includes(u.type);
 const isRotor=u=>u.type==='helicopter'||u.type==='heavy';
 const isWaterAir=u=>isRotor(u)||u.type==='scooper';
 let gameMode='campaign',difficultyScale=1,sandboxWind=20,sandboxBudget=5000,sandboxIgnitions=8,viewZoom=1,viewX=1000,viewY=650,panMode=false,forecastOn=false,terrainOn=false;
@@ -97,7 +100,7 @@ function rank(u){
   return training.findLastIndex(t=>u.xp>=t.xp);
 }
 function unitPerks(u,level=rank(u)){
-  const type=types[u.type];
+  const type=unitSpec(u);
   return {
     speed:type.speed*(level>=1?1.20:1),
     capacity:type.capacity*(level>=2&&u.type!=='tanker'?1.25:1),
@@ -387,17 +390,17 @@ for(let k=0;k<(gameMode==='sandbox'?sandboxIgnitions:8)&&firstFires.length;k++){
   const [tile]=firstFires.splice(Math.floor(rnd()*firstFires.length),1);
   tile.fire=Math.min(fireBehavior(tile).peak,rand(.45,.9));
 }
-units=[createUnit('Brush Engine 1','engine',36,20),createUnit('Hand Crew 1','crew',38,30)];$('overlay').classList.remove('hidden');$('overlayTitle').textContent='HOLD THE FIRELINE';$('overlayText').textContent='Protect at least 8 of 12 homes through escalating wildfire incidents. See how long your operation can hold. Select a unit, choose an order, then tap the map. Earn unit XP by putting out fires and cutting fresh firebreaks. Scroll the command panel to recruit units and build your base.';$('start').textContent='START INCIDENT';$('pause').textContent='⏸ Pause';$('speed').textContent='1× Speed';$('riskbar').style.width='100%';msg('Incident reported. Watch for wind shifts.');setOrder('attack');refreshUI()}function createUnit(name,type,x,y){return{name,type,x:x*C+C/2,y:y*C+C/2,tx:x*C+C/2,ty:y*C+C/2,water:types[type].capacity,capacity:types[type].capacity,mode:types[type].capacity?'auto':'move',resume:null,health:100,cooldown:0,xp:0}}function setOrder(o){order=o;airDrop=false;buildingMode=null;document.querySelectorAll('[data-build]').forEach(b=>b.classList.remove('selected'));document.querySelectorAll('[data-order]').forEach(b=>b.classList.toggle('selected',b.dataset.order===o));let d={move:'Move: select a destination for your crew or engine.',attack:'Suppress: tap a burning area. Unit will move closer and spray automatically.',break:'Firebreak: tap ground to clear a fuel barrier. Dozers cut a continuous line along their route. Other ground units clear the destination.',refill:'Refill: tap a riverbank or depot to use it, or tap elsewhere for the fastest reachable source.',defend:'Defend: select a position. The unit will hold it and automatically attack nearby fires.'};$('orderDescription').textContent=d[o];refreshUI()}const recruitButtons={reinforce:'engine',crew:'crew',dozer:'dozer',helicopter:'helicopter',tanker:'tanker',heavy:'heavy',scooper:'scooper',tender:'tender',chief:'chief',airattack:'airattack'};
+units=[createUnit('Brush Engine 1','engine',36,20),createUnit('Hand Crew 1','crew',38,30)];$('overlay').classList.remove('hidden');$('overlayTitle').textContent='HOLD THE FIRELINE';$('overlayText').textContent='Protect at least 8 of 12 homes through escalating wildfire incidents. See how long your operation can hold. Select a unit, choose an order, then tap the map. Earn unit XP by putting out fires and cutting fresh firebreaks. Scroll the command panel to recruit units and build your base.';$('start').textContent='START INCIDENT';$('pause').textContent='⏸ Pause';$('speed').textContent='1× Speed';$('riskbar').style.width='100%';msg('Incident reported. Watch for wind shifts.');setOrder('attack');refreshUI()}function createUnit(name,type,x,y){return{name,type,x:x*C+C/2,y:y*C+C/2,tx:x*C+C/2,ty:y*C+C/2,water:types[type].capacity,capacity:types[type].capacity,mode:types[type].capacity?'auto':'move',resume:null,health:100,cooldown:0,xp:0}}function setOrder(o){order=o;airDrop=false;buildingMode=null;document.querySelectorAll('[data-build]').forEach(b=>b.classList.remove('selected'));document.querySelectorAll('[data-order]').forEach(b=>b.classList.toggle('selected',b.dataset.order===o));let d={move:'Move: select a destination for your crew or engine.',attack:'Suppress: tap a burning area. Unit will move closer and spray automatically.',break:'Firebreak: tap ground to clear a fuel barrier. Dozers cut a continuous line along their route. Other ground units clear the destination.',refill:'Refill: tap a riverbank or depot to use it, or tap elsewhere for the fastest reachable source.',defend:'Defend: select a position. The unit will hold it and automatically attack nearby fires.'};$('orderDescription').textContent=d[o];refreshUI()}const recruitButtons={type1:'type1',type3:'type3',hotshot:'hotshot',heavydozer:'heavydozer',investigator:'investigator',utility:'utility',mobilecommand:'mobilecommand',vlat:'vlat',medical:'medical',reinforce:'engine',crew:'crew',dozer:'dozer',helicopter:'helicopter',tanker:'tanker',heavy:'heavy',scooper:'scooper',tender:'tender',chief:'chief',airattack:'airattack'};
 const unitLimits={
-  station:{engine:3,crew:3,dozer:1,tender:1,chief:1},
-  hq:{engine:5,crew:5,dozer:2,tender:2,chief:2},
-  airport:{helicopter:3,tanker:2,heavy:1,scooper:1,airattack:1}
+  station:{engine:3,crew:3,dozer:1,tender:1,chief:1,type1:1,type3:2,hotshot:1,heavydozer:1,investigator:1,utility:1,medical:1},
+  hq:{engine:5,crew:5,dozer:2,tender:2,chief:2,type1:2,type3:3,hotshot:2,heavydozer:2,investigator:1,utility:2,medical:2,mobilecommand:1},
+  airport:{helicopter:3,tanker:2,heavy:1,scooper:1,airattack:1,vlat:1}
 };
-const unitLabels={engine:'Engines',crew:'Crews',dozer:'Dozers',helicopter:'Helicopters',tanker:'Tankers',heavy:'Heavy lift',scooper:'Scoopers',tender:'Tenders',chief:'Chiefs',airattack:'Air attack'};
+const unitLabels={type1:"Type 1 Engine",type3:"Type 3 Engine",hotshot:"Hotshot Crew",heavydozer:"Type 1 Dozer",investigator:"Fire Investigator",utility:"Utility Truck",mobilecommand:"Mobile Command Unit",vlat:"Very Large Air Tanker",medical:"Medical Unit",engine:'Engines',crew:'Crews',dozer:'Dozers',helicopter:'Helicopters',tanker:'Tankers',heavy:'Heavy lift',scooper:'Scoopers',tender:'Tenders',chief:'Chiefs',airattack:'Air attack'};
 let unitPurchases={};
 
 function unitCount(base,type){
-  return units.filter(u=>u.homeBase===base&&u.type===type&&u.health>0).length;
+  return units.filter(u=>u.homeBase===base&&(u.model||u.type)===type&&u.health>0).length;
 }
 function recruitmentBase(type){
   return buildings.find(b=>unitLimits[b.type]&&
@@ -451,10 +454,10 @@ const u=units[i],container=$('units');
 let b=container.children[i];
 if(!b){b=document.createElement('button');b.type='button';b.dataset.unit=i;b.onclick=(event)=>{selectUnits([i],event.shiftKey);refreshUI()};container.appendChild(b)}
 b.className='unit'+(selectedGroup.has(i)?' active':'');b.disabled=u.health<=0;b.setAttribute('aria-pressed',selectedGroup.has(i));
-const status=u.health<=0?'Destroyed':u.type==='tender'&&u.mode!=='retreat'?(u.tenderStatus||'Ready for dispatch'):u.type==='chief'&&u.mode!=='retreat'?(u.chiefStatus||'Ready for dispatch'):u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.detourUntil>elapsed?'Cutting around fire':u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
+const status=u.health<=0?'Destroyed':u.type==='tender'&&u.mode!=='retreat'?(u.tenderStatus||'Ready for dispatch'):isFieldSupport(u)&&u.mode!=='retreat'?(u.supportStatus||'Ready for dispatch'):u.type==='chief'&&u.mode!=='retreat'?(u.chiefStatus||'Ready for dispatch'):u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.detourUntil>elapsed?'Cutting around fire':u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
 const value=u.type==='tanker'?'Retardant '+Math.round(100*u.water/u.capacity)+'%':u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
 const task=chiefAssignment(u);
-const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${task&&u.mode==='auto'?task.kind:status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
+const html=`<span class="symbol">${unitSpec(u).icon}</span><span class="grow"><b>${u.name}</b><small>${task&&u.mode==='auto'?task.kind:status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
 if(b.innerHTML!==html)b.innerHTML=html;
 }
 while($('units').children.length>units.length)$('units').lastElementChild.remove();
@@ -486,7 +489,7 @@ refreshAirDropButton();document.querySelectorAll('[data-build]').forEach(b=>{b.d
   refreshUI();
 }
 function issueUnitOrder(u,x,y,command){
-  if(command==='break'&&(isAir(u)||u.type==='chief'||u.type==='tender'))return false;
+  if(command==='break'&&(isAir(u)||u.type==='chief'||u.type==='tender'||isFieldSupport(u)))return false;
   if((command==='attack'||command==='refill')&&!u.capacity)return false;
   u.resume=null;u.repairing=false;u.perimeter=null;u.lineWatch=null;u.tankerRun=null;u.tankerOrbit=null;u.heliTarget=null;u.heliOrbit=null;
   u.commandTask=null;u.manualUntil=elapsed+25;u.mode=command;u.tx=x;u.ty=y;if(u.type==='chief'){u.chiefPlanAt=0;u.chiefStatus=command==='defend'?'Driving to command post':'Driving to assigned location';}
@@ -755,7 +758,7 @@ function moveUnit(u,step,airStop=7){
     const nx=u.x+(x-u.x)*fraction,ny=u.y+(y-u.y)*fraction;
     const tile=positionTile(nx,ny);
     if(!airborne&&tile!==current&&!groundPassable(tile))return false;
-    if((isAir(u)||u.type==='engine'||u.type==='crew'||u.type==='dozer'||u.type==='tender'||u.type==='chief')&&Math.hypot(nx-u.x,ny-u.y)>0.0001){u.heading=Math.atan2(ny-u.y,nx-u.x);if(u.type==='crew'){u.walkDistance=(u.walkDistance??0)+Math.hypot(nx-u.x,ny-u.y);u.lastWalk=elapsed;}}
+    if((isAir(u)||u.type==='engine'||u.type==='crew'||u.type==='dozer'||u.type==='tender'||u.type==='chief'||isFieldSupport(u))&&Math.hypot(nx-u.x,ny-u.y)>0.0001){u.heading=Math.atan2(ny-u.y,nx-u.x);if(u.type==='crew'){u.walkDistance=(u.walkDistance??0)+Math.hypot(nx-u.x,ny-u.y);u.lastWalk=elapsed;}}
     u.x=nx;
     u.y=ny;
     return true;
@@ -913,7 +916,7 @@ function helicopterAttackCourse(u,fire,dt){
 }
 function chiefCommandStats(u){
   const level=rank(u);
-  return {radius:[160,190,225,260][level],bonus:[.12,.15,.20,.25][level]};
+  return {radius:[160,190,225,260][level]+(u.model==='mobilecommand'?110:0),bonus:[.12,.15,.20,.25][level]+(u.model==='mobilecommand'?.05:0)};
 }
 function chiefActive(u){
   return u.type==='chief'&&u.health>0&&!['home','retreat','standby'].includes(u.mode);
@@ -1039,7 +1042,30 @@ function updateTender(u,dt,perks,hasFire){
   u.tenderStatus=delivered>0?'Supplying water':target?'Driving to resources':'Standing by';
   if(!unlimitedWater&&u.water<=0)sendForWater(u);
 }
+function updateFieldSupport(u,dt,perks,hasFire){
+  if(!isFieldSupport(u))return false;
+  if(['move','defend'].includes(u.mode)&&dist(u.x,u.y,u.tx,u.ty)>8){moveUnit(u,perks.speed*dt);return true;}
+  if(!hasFire&&!tiles.some(t=>t.smolder>0)){Object.assign(u,baseAssignment(u));moveUnit(u,perks.speed*dt);return true;}
+  if(u.mode!=='defend')u.mode='auto';
+  if(u.type==='investigator'){
+    if(elapsed>=(u.supportPlanAt||0)){
+      u.supportPlanAt=elapsed+2;
+      const candidates=tiles.filter(t=>t.smolder>0&&groundPassable(t)).sort((a,b)=>dist(u.x,u.y,a.x*C+C/2,a.y*C+C/2)-dist(u.x,u.y,b.x*C+C/2,b.y*C+C/2));
+      const t=candidates[0];if(t&&u.mode!=='defend'){u.tx=t.x*C+C/2;u.ty=t.y*C+C/2;}
+    }
+    moveUnit(u,perks.speed*dt);
+    for(const t of tiles)if(t.smolder>0&&dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2)<100){t.revealed=true;if(t.smolder>0&&dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2)<25){t.smolder=0;t.wet=Math.max(t.wet,6);setXP(u,u.xp+2);}}
+    u.supportStatus='Inspecting hotspots';return true;
+  }
+  const eligible=v=>v!==u&&v.health>0&&!isAir(v)&&(u.type==='medical'?v.type==='crew':v.type!=='crew')&&(v.health<100||(u.type==='medical'&&(v.fatigue||0)>10)||v.breakdown);
+  const peers=units.filter(eligible).sort((a,b)=>a.health-b.health||dist(u.x,u.y,a.x,a.y)-dist(u.x,u.y,b.x,b.y));
+  const target=peers[0];
+  if(target&&u.mode!=='defend'&&dist(u.x,u.y,target.x,target.y)>35){u.tx=target.x;u.ty=target.y;moveUnit(u,perks.speed*dt);}
+  for(const v of peers)if(dist(u.x,u.y,v.x,v.y)<55){v.health=Math.min(100,v.health+dt*(u.type==='medical'?10:7));if(u.type==='medical')v.fatigue=Math.max(0,(v.fatigue||0)-dt*8);else if(v.health>55)v.breakdown=false;}
+  u.supportStatus=target?(u.type==='medical'?'Treating crews':'Field repairs'):'Standing by';return true;
+}
 function updateSupportUnit(u,dt,perks,hasFire){
+  if(updateFieldSupport(u,dt,perks,hasFire))return true;
   if(!['chief','tender','airattack'].includes(u.type))return false;
   if(u.type==='chief'){updateChief(u,dt,perks,hasFire);return true;}
   if(u.type==='tender'){updateTender(u,dt,perks,hasFire);return true;}
@@ -1145,7 +1171,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
     sendForWater(u);
   }
 
-  const range=types[u.type].range;
+  const range=unitSpec(u).range;
   if(isWaterAir(u)&&u.mode!=='auto'){u.heliTarget=null;u.heliOrbit=null;}
   if(u.mode==='auto'){
     if(isWaterAir(u)){
@@ -1225,7 +1251,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
     const fire=isWaterAir(u)&&u.mode==='auto'?(u.heliTarget?.fire>.02&&dist(u.x,u.y,u.heliTarget.x*C+12,u.heliTarget.y*C+12)<=range?u.heliTarget:null):nearestFire(u,range,undefined,u.mode==='auto'||u.mode==='defend');
     if(fire){
       const x=fire.x*C+12,y=fire.y*C+12;
-      u.cooldown=types[u.type].delay;
+      u.cooldown=unitSpec(u).delay;
       fire.credited=true;
       const use=u.type==='scooper'?25:isRotor(u)?15:u.type==='engine'?2:1.5;
       const strength=unlimitedWater?1:Math.min(1,u.water/use);
@@ -1258,7 +1284,7 @@ function updateAirportTanker(u,dt,perks,hasFire){
   const queue=()=>{if(u.runwayQueuedAt==null)u.runwayQueuedAt=elapsed;};
   const firstInQueue=()=>!peers.some(v=>v.runwayQueuedAt!=null&&
     (v.runwayQueuedAt<u.runwayQueuedAt||(v.runwayQueuedAt===u.runwayQueuedAt&&units.indexOf(v)<units.indexOf(u))));
-  const parkingX=base.x+(u.airportBay===1?1:-1)*2*C,parkingY=base.y-C;
+  const parkingX=base.x+([-2,2,0][u.airportBay]??0)*C,parkingY=base.y-C;
   const hold=()=>{
     const radius=100+(u.airportBay||0)*38;
     const cx=Math.max(radius+5,Math.min(W-radius-5,base.x));
@@ -1333,7 +1359,7 @@ function updateAirportTanker(u,dt,perks,hasFire){
   travel(o.cx+Math.cos(angle+ahead)*radius,o.cy+Math.sin(angle+ahead)*radius,perks.speed);
 }
 function tankerFootprint(run){
-  const width=35,length=dist(run.start.x,run.start.y,run.end.x,run.end.y);
+  const width=run.width||35,length=dist(run.start.x,run.start.y,run.end.x,run.end.y);
   if(length<.001)return [];
   const dx=(run.end.x-run.start.x)/length,dy=(run.end.y-run.start.y)/length;
   const result=[];
@@ -1395,12 +1421,12 @@ function chooseTankerMission(u){
   let best=null,bestScore=-Infinity;
   for(const {t,score,role} of top){
     for(let q=1;q<=max;q++){
-      const x=t.x*C+C/2,y=t.y*C+C/2,half=130*q/4;
+      const x=t.x*C+C/2,y=t.y*C+C/2,half=(u.model==='vlat'?230:130)*q/4;
       const edge=(p,d,limit)=>d===0?Infinity:((d>0?limit-1:1)-p)/d;
       const end=sign=>{const n=Math.min(half,edge(x,dx*sign,W),edge(y,dy*sign,H));return {x:x+dx*sign*n,y:y+dy*sign*n}};
       let start=end(-1),finish=end(1);
       if(dist(u.x,u.y,finish.x,finish.y)<dist(u.x,u.y,start.x,start.y))[start,finish]=[finish,start];
-      const run={start,end:finish,role,amount:q*u.capacity/4,dropping:false,covered:new Set(),wind:windDirection,checkAt:elapsed+2,manual};
+      const run={start,end:finish,width:u.model==='vlat'?50:35,role,amount:q*u.capacity/4,dropping:false,covered:new Set(),wind:windDirection,checkAt:elapsed+2,manual};
       const footprint=tankerFootprint(run);
       if(!footprint.length||footprint.some(t=>reserved.has(t)||heliTargets.has(t)))continue;
       let useful=0,overlap=0;
@@ -1453,7 +1479,7 @@ function flyTankerRun(u,dt,perks,hasFire){
 }
 
 function paintRetardant(u,run,x,y,power){
-  const width=35;
+  const width=run.width||35;
   const length=dist(run.start.x,run.start.y,run.end.x,run.end.y);
   if(length<.001)return;
   const dx=(run.end.x-run.start.x)/length,dy=(run.end.y-run.start.y)/length;
@@ -1757,6 +1783,21 @@ function drawStation(b){
   ctx.fillStyle='#a6a7a1';ctx.fillRect(-11,10,22,2);
   ctx.restore();
 }
+function drawSpecialistSprite(u){
+  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);
+  const med=u.type==='medical',command=u.model==='mobilecommand',utility=u.type==='utility';
+  const length=command?28:med?24:22;
+  ctx.fillStyle='#202729';for(const x of [-length/2+3,length/2-7])for(const y of [-7,4])ctx.fillRect(x,y,4,3);
+  ctx.fillStyle=med?'#f2f1e8':command?'#e8e2d4':utility?'#d0a144':'#b58b54';ctx.fillRect(-length/2,-5.5,length,11);
+  ctx.fillStyle=command?'#b53327':med?'#e4e4e0':'#d3b071';ctx.fillRect(length/2-8,-5.5,8,11);
+  ctx.fillStyle='#426474';ctx.fillRect(length/2-5,-4.5,2.5,9);
+  if(med){ctx.fillStyle='#d13830';ctx.fillRect(-8,-1.5,10,3);ctx.fillRect(-4.5,-5,3,10);}
+  else if(command){ctx.fillStyle='#a9352a';ctx.fillRect(-length/2,3,length-8,2);ctx.fillStyle='#36494d';ctx.fillRect(-9,-3,7,6);ctx.strokeStyle='#202a2e';ctx.beginPath();ctx.moveTo(-10,-4);ctx.lineTo(-14,-11);ctx.stroke();}
+  else if(utility){ctx.fillStyle='#465157';ctx.fillRect(-10,-4,11,8);ctx.fillStyle='#b8c2c0';for(const x of [-8,-4,0])ctx.fillRect(x,-3,1,6);}
+  else{ctx.fillStyle='#e8e7d7';ctx.fillRect(-9,-4,10,8);ctx.fillStyle='#344f5b';ctx.fillRect(-8,-3,2,6);}
+  ctx.fillStyle=Math.floor(renderPrev/180)%2?'#ff7450':'#a94432';ctx.fillRect(3,-4,2,8);
+  ctx.fillStyle='#fff2c8';ctx.fillRect(length/2-1,-4,1,2);ctx.fillRect(length/2-1,2,1,2);ctx.restore();
+}
 function drawCrewSprite(u){
   ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);
   const walking=elapsed-(u.lastWalk??-100)<.12;
@@ -1766,7 +1807,7 @@ function drawCrewSprite(u){
     ctx.beginPath();ctx.moveTo(-3,side*2.5);ctx.lineTo(-7+side*stride,side*3);ctx.stroke();
     ctx.strokeStyle='#242b29';ctx.beginPath();ctx.moveTo(-7+side*stride,side*3);ctx.lineTo(-5+side*stride,side*3);ctx.stroke();ctx.strokeStyle='#304b39';
   }
-  ctx.fillStyle='#dcae35';ctx.fillRect(-4,-4,8,8);
+  ctx.fillStyle=u.model==='hotshot'?'#e79032':'#dcae35';ctx.fillRect(-4,-4,8,8);
   ctx.strokeStyle='#eac34d';ctx.lineWidth=2.5;
   for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(1,side*4);ctx.lineTo(-1-side*stride,side*6);ctx.stroke();}
   ctx.fillStyle='#53654a';ctx.fillRect(-5,-3,4,6);
@@ -1776,7 +1817,7 @@ function drawCrewSprite(u){
   ctx.restore();
 }
 function drawTankerSprite(u){
-  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25*(1-Math.abs(u.bank||0)*.55));
+  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25*(u.model==='vlat'?1.5:1),C/25*(u.model==='vlat'?1.5:1)*(1-Math.abs(u.bank||0)*.55));
   const shape=()=>{
     ctx.beginPath();ctx.moveTo(21,0);ctx.quadraticCurveTo(19,-4,12,-4);
     ctx.lineTo(3,-4);ctx.lineTo(-5,-19);ctx.lineTo(-11,-19);ctx.lineTo(-7,-4);
@@ -1818,7 +1859,7 @@ function drawDozerSprite(u){
   ctx.fillStyle='#e9b32f';ctx.fillRect(-8,-4.5,3,9);
   ctx.fillStyle='#333b3b';ctx.fillRect(2,-3,4,1.4);ctx.fillRect(5,1,2,2);
   ctx.strokeStyle='#af801d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(4,-5);ctx.lineTo(10,-8);ctx.moveTo(4,5);ctx.lineTo(10,8);ctx.stroke();
-  ctx.fillStyle='#e4ae36';ctx.fillRect(9,-11,3,22);
+  ctx.fillStyle=u.model==='heavydozer'?'#eac44c':'#e4ae36';ctx.fillRect(9,-11,3,22);if(u.model==='heavydozer'){ctx.fillStyle='#323a3b';ctx.fillRect(-10,-3,5,6);}
   ctx.fillStyle='#bfc3bc';ctx.fillRect(11,-11,1.2,22);
   ctx.fillStyle='#8a661d';ctx.fillRect(-12,-2,3,4);
   ctx.restore();
@@ -1901,7 +1942,7 @@ function drawChiefSprite(u){
 function drawEngineSprite(u){
   ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25);
   ctx.fillStyle='#20292b';for(const x of [-8,4])for(const y of [-6,4])ctx.fillRect(x,y,4,2);
-  ctx.fillStyle='#a42b25';ctx.fillRect(-10,-4.5,20,9);
+  ctx.fillStyle=u.model==='type3'?'#a65b24':'#a42b25';ctx.fillRect(-10,-4.5,20,9);if(u.model==='type1'){ctx.fillStyle='#bfc6c9';ctx.fillRect(-11,-6,18,12);}
   ctx.fillStyle='#e44736';ctx.fillRect(3,-4.5,7,9);
   ctx.fillStyle='#a9d5e5';ctx.fillRect(6,-3.5,2.5,7);
   ctx.fillStyle='#c9d0d0';ctx.fillRect(-8.5,-3.5,10,7);
@@ -2021,7 +2062,7 @@ function draw(){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.save();
       }
     }else if(t.water){ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);ctx.fillStyle='#70b1c780';ctx.fillRect(x+2,y+9,C-4,2)}else if(t.road){ctx.fillStyle='#666963';ctx.fillRect(x,y,C,C);ctx.fillStyle='#d2c99b';if(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road)ctx.fillRect(x+8,y+11,9,2);if(at(t.x,t.y-1)?.road||at(t.x,t.y+1)?.road)ctx.fillRect(x+11,y+8,2,9)}else{ctx.fillStyle=t.burnt?'#272b26':t.break?'#795034':(t.tree?(t.x+t.y)%3===0?'#355632':'#3d613c':'#658157');ctx.fillRect(x,y,C,C);if(t.tree&&!t.burnt&&!t.break)drawForestTree(t,x,y);}if(t.retardant>0){ctx.fillStyle='rgba(230,80,112,.65)';ctx.fillRect(x,y,C,C)}if(t.wet>1){ctx.fillStyle='rgba(86,178,226,.22)';ctx.fillRect(x,y,C,C)}if(terrainOn&&!t.water){ctx.fillStyle='rgba(230,220,165,'+Math.max(0,Math.min(.22,(t.elevation-50)/900))+')';ctx.fillRect(x,y,C,C);}
 if(forecastOn&&t.fire<=.02&&!t.water&&!t.break&&t.fuel>0&&spreadNeighbors.some(([dx,dy])=>at(t.x-dx,t.y-dy)?.fire>.02&&windAlignment(dx,dy)>.3)){ctx.fillStyle='#ffb52d55';ctx.fillRect(x,y,C,C);}
-if(t.fire>.02)drawWildfire(t,x,y);if(t.hydrant)drawHydrant(t);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='airport'){drawAirport(b);continue}if(b.type==='station'){drawStation(b);continue}if(b.type==='water'){drawWaterTower(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();drawTenderHydrantHoses();drawVisibleEmbers();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'||u.type==='tanker'||u.type==='dozer'||u.type==='chief'||u.type==='tender'){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='tanker'||u.type==='scooper'||u.type==='airattack'){drawTankerSprite(u)}else if(u.type==='dozer'){drawDozerSprite(u)}else if(u.type==='engine'){drawEngineSprite(u)}else if(u.type==='chief'){drawChiefSprite(u)}else if(u.type==='tender'){drawTenderSprite(u)}else if(isRotor(u)){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'&&u.type!=='tanker'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}ctx.restore();const darkness=.20*(1-Math.cos((elapsed%240)/240*TWO))/2;ctx.fillStyle='rgba(8,15,40,'+darkness+')';ctx.fillRect(0,0,W,H);
+if(t.fire>.02)drawWildfire(t,x,y);if(t.hydrant)drawHydrant(t);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='airport'){drawAirport(b);continue}if(b.type==='station'){drawStation(b);continue}if(b.type==='water'){drawWaterTower(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();drawTenderHydrantHoses();drawVisibleEmbers();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(true){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='tanker'||u.type==='scooper'||u.type==='airattack'){drawTankerSprite(u)}else if(u.type==='dozer'){drawDozerSprite(u)}else if(u.type==='engine'){drawEngineSprite(u)}else if(u.model==='mobilecommand'||isFieldSupport(u)){drawSpecialistSprite(u)}else if(u.type==='chief'){drawChiefSprite(u)}else if(u.type==='tender'){drawTenderSprite(u)}else if(isRotor(u)){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'&&u.type!=='tanker'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}ctx.restore();const darkness=.20*(1-Math.cos((elapsed%240)/240*TWO))/2;ctx.fillStyle='rgba(8,15,40,'+darkness+')';ctx.fillRect(0,0,W,H);
 }function coords(e){
   const r=canvas.getBoundingClientRect();
   const scale=Math.min(r.width/W,r.height/H);
@@ -2081,14 +2122,14 @@ const spec=types[type],cost=unitCost(type);if(!started||ended||funds<cost)return
 const base=recruitmentBase(type);
 if(!base)return;
 const x=Math.floor(base.x/C),y=Math.floor(base.y/C);
-const unit=createUnit(spec.label+' '+(units.filter(u=>u.type===type).length+1),type,x,y);
+const unit=createUnit(spec.label+' '+(units.filter(u=>(u.model||u.type)===type).length+1),spec.role||type,x,y);if(spec.role){unit.model=type;unit.capacity=unit.water=spec.capacity;unit.mode=spec.capacity?'auto':'move';}
 unit.homeBase=base;
-if(type==='tanker'){const bays=new Set(units.filter(v=>v.health>0&&v.type==='tanker'&&v.homeBase===base).map(v=>v.airportBay));unit.airportBay=bays.has(0)?1:0;unit.airportStage='ready';unit.heading=0;unit.x=base.x+(unit.airportBay===1?1:-1)*2*C;unit.y=base.y-C;unit.tx=unit.x;unit.ty=unit.y;}
+if(unit.type==='tanker'){const bays=new Set(units.filter(v=>v.health>0&&v.type==='tanker'&&v.homeBase===base).map(v=>v.airportBay));unit.airportBay=[0,1,2].find(i=>!bays.has(i))??0;unit.airportStage='ready';unit.heading=0;unit.x=base.x+([-2,2,0][unit.airportBay]??0)*C;unit.y=base.y-C;unit.tx=unit.x;unit.ty=unit.y;}
 if(isRotor(unit)){const occupied=new Set(units.filter(u=>u.health>0&&isRotor(u)&&u.homeBase===base).map(u=>u.helipad));unit.helipad=[-2,0,2,3].find(p=>!occupied.has(p))??0;unit.x=base.x+unit.helipad*C;unit.tx=unit.x;unit.y=base.y+C;unit.ty=unit.y;}
 funds-=cost;
 unitPurchases[type]=(unitPurchases[type]||0)+1;
 units.push(unit);
-selected=units.length-1;selectedGroup=new Set([selected]);setOrder(type==='dozer'?'break':'attack');msg(spec.label+' ready for dispatch.');
+selected=units.length-1;selectedGroup=new Set([selected]);setOrder(unit.type==='dozer'?'break':unit.capacity?'attack':'move');msg(spec.label+' ready for dispatch.');
 }}
 function setCheatPanel(showGate, unlocked){
   cheatsUnlocked=unlocked;
@@ -2257,5 +2298,5 @@ function syncFullscreenButton(){
 }
 document.addEventListener('fullscreenchange',syncFullscreenButton);
 document.addEventListener('webkitfullscreenchange',syncFullscreenButton);
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&started&&!ended&&!paused)$('pause').click()});document.addEventListener('keydown',e=>{if(e.target.matches('input, .response-units summary'))return;let o={'1':'move','2':'attack','3':'break','4':'refill','5':'defend'}[e.key];if(o)setOrder(o);if(e.code==='Space'){e.preventDefault();$('pause').click()}});function frame(now){let dt=Math.min((now-renderPrev)/1000,.07);renderPrev=now;if(started&&!paused&&!ended){simAccum+=dt*speed;while(simAccum>.045){update(.045);simAccum-=.045}}if(airDropReadyAt)refreshAirDropButton();draw();requestAnimationFrame(frame)}reset();requestAnimationFrame(frame)})();
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&started&&!ended&&!paused)$('pause').click()});document.addEventListener('keydown',e=>{if(e.target.matches('input, select, textarea, .response-units summary'))return;let o={'1':'move','2':'attack','3':'break','4':'refill','5':'defend'}[e.key];if(o)setOrder(o);if(e.code==='Space'){e.preventDefault();$('pause').click()}});function frame(now){let dt=Math.min((now-renderPrev)/1000,.07);renderPrev=now;if(started&&!paused&&!ended){simAccum+=dt*speed;while(simAccum>.045){update(.045);simAccum-=.045}}if(airDropReadyAt)refreshAirDropButton();draw();requestAnimationFrame(frame)}reset();requestAnimationFrame(frame)})();
 </script></body></html>
