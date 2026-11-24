@@ -71,7 +71,7 @@ button:focus-visible{outline:2px solid #ffd27c;outline-offset:2px}
   <p id="cheatError" class="tips" role="status"></p>
 </form>
 <div id="cheatMenu" hidden>
-<div class="actions" style="margin-top:8px"><button id="cheatWater" aria-pressed="false">Unlimited Water</button><button id="cheatCash">+$1,000</button><button id="cheatSpread" aria-pressed="false">Freeze Spread</button><button id="cheatContain" class="wide">Extinguish All Fires</button></div><form id="xpCheat" class="xp-control"><label class="tips">Selected unit XP<input id="xpValue" type="number" inputmode="numeric" min="0" max="999999" step="1" required></label><button id="setXP" type="submit">Set XP</button></form>
+<div class="actions" style="margin-top:8px"><button id="cheatWater" aria-pressed="false">Unlimited Water</button><button id="cheatCash">+$1,000</button><button id="cheatSpread" aria-pressed="false">Freeze Spread</button><button id="cheatContain" class="wide">Extinguish All Fires</button></div><form id="fundsCheat" class="xp-control"><label class="tips">Set total money ($)<input id="fundsValue" type="number" inputmode="numeric" min="0" max="999999999" step="1" required></label><button id="setFunds" type="submit">Set Money</button></form><p id="fundsFeedback" class="tips" role="status"></p><form id="xpCheat" class="xp-control"><label class="tips">Selected unit XP<input id="xpValue" type="number" inputmode="numeric" min="0" max="999999" step="1" required></label><button id="setXP" type="submit">Set XP</button></form>
 <form id="incidentJump" class="xp-control">
   <label class="tips">Incident / Level<input id="incidentNumber" type="number" inputmode="numeric" min="1" step="1" required></label>
   <button type="submit">Jump</button>
@@ -420,6 +420,9 @@ $('containmentBar').style.width=stats.percent+'%';
 const cheatsAvailable=cheatsUnlocked&&started&&!ended;
 $('cheatWater').disabled=!cheatsAvailable;
 $('cheatCash').disabled=!cheatsAvailable;
+$('setFunds').disabled=!cheatsAvailable;
+$('fundsValue').disabled=!cheatsAvailable;
+$('fundsValue').placeholder=String(Math.floor(funds));
 $('cheatSpread').disabled=!cheatsAvailable;
 $('cheatContain').disabled=!cheatsAvailable;
 const lead=units[selected];
@@ -1929,6 +1932,8 @@ function setCheatPanel(showGate, unlocked){
   $('cheatCode').value='';
   $('cheatError').textContent='';
   $('incidentError').textContent='';
+  $('fundsFeedback').textContent='';
+  $('fundsValue').value='';
   const open=showGate||unlocked;
   $('toggleCheats').textContent=open?'Close Cheat Menu':'Open Cheat Menu';
   $('toggleCheats').setAttribute('aria-expanded',String(open));
@@ -1995,6 +2000,21 @@ $('cheatCash').onclick=()=>{
   if(!cheatsUnlocked||!started||ended)return;
   funds+=1000;
   msg('Cheat added $1,000 to base funds.');
+  refreshUI();
+};
+$('fundsCheat').onsubmit=event=>{
+  event.preventDefault();
+  if(!cheatsUnlocked||!started||ended)return;
+  const field=$('fundsValue'),value=field.valueAsNumber;
+  if(!Number.isSafeInteger(value)||value<0||value>999999999){
+    $('fundsFeedback').textContent='Enter a whole dollar amount from 0 to 999,999,999.';
+    return;
+  }
+  funds=value;
+  const message='Base funds set to $'+value.toLocaleString('en-US')+'.';
+  $('fundsFeedback').textContent=message;
+  field.value='';
+  msg(message);
   refreshUI();
 };
 $('xpCheat').onsubmit=event=>{
