@@ -61,7 +61,7 @@ button:focus-visible{outline:2px solid #ffd27c;outline-offset:2px}
 /* The hidden attribute must override layout display rules. */
 #cheatGate[hidden],#cheatMenu[hidden]{display:none!important}
 #cheatError{min-height:1.3em}
-</style></head><body><div class="shell"><div class="top"><div><div class="tag">WILDFIRE RESPONSE SIMULATOR</div><div class="brand">🔥 FIRELINE COMMAND</div></div><div class="metrics"><div class="metric"><small>Structures saved</small><strong id="saved">0 / 12</strong></div><div class="metric"><small>Burning acres</small><strong id="burning">0</strong></div><div class="metric"><small>Base funds</small><strong id="funds">$700</strong></div><div class="metric"><small>Income / sec</small><strong id="income">+$1.2</strong></div><div class="metric"><small>Incident</small><strong id="wave">1</strong></div><div class="metric"><small>Time</small><strong id="clock">00:00</strong></div></div></div><div class="layout"><div><div class="mapwrap" id="mapwrap"><canvas id="map" width="2000" height="1300" aria-label="Firefighting strategy game map"></canvas><div class="overlay" id="overlay"><div class="overlay-inner"><div class="big">🚒🌲</div><h1 id="overlayTitle">HOLD THE FIRELINE</h1><p id="overlayText">Protect at least 8 of 12 homes as wildfire incidents get harder.</p><button class="primary" id="start" style="padding:15px 30px;font-size:16px">START INCIDENT</button></div></div></div><div class="footer"><div class="legend"><span><i class="dot" style="background:#e95730"></i>Fire</span><span><i class="dot" style="background:#76b9ee"></i>Water</span><span><i class="dot" style="background:#d7d2ab"></i>Firebreak</span><span><i class="dot" style="background:#f0d9ad"></i>Homes</span></div><div><button id="pause">⏸ Pause</button> <button id="speed">1× Speed</button> <button id="restart">↻ Restart</button> <button id="fullscreen" type="button">⛶ Fullscreen</button><p id="fullHint" role="status" hidden></p></div></div></div><div class="side"><div class="panel"><h3>Incident overview</h3><div id="incidentStats" class="tips" aria-live="off"></div><div class="bar"><i id="containmentBar" style="width:0%"></i></div><div class="tips">Containment is the protected share of active fire tiles, not a real-world perimeter measurement.</div></div><div class="panel"><h3>Orders</h3><div class="actions"><button data-order="move">➤ Move</button><button data-order="attack" class="selected">💦 Suppress</button><button data-order="break">⛏ Cut Line</button><button data-order="refill">🚰 Refill</button><button data-order="defend" class="wide">🛡 Defend Location</button></div><div id="orderDescription" class="tips" style="margin-top:10px">Move: select a destination for your crew or engine.</div></div><div class="panel"><h3>Cheats</h3>
+</style></head><body><div class="shell"><div class="top"><div><div class="tag">WILDFIRE RESPONSE SIMULATOR</div><div class="brand">🔥 FIRELINE COMMAND</div></div><div class="metrics"><div class="metric"><small>Structures saved</small><strong id="saved">0 / 12</strong></div><div class="metric"><small>Burning acres</small><strong id="burning">0</strong></div><div class="metric"><small>Base funds</small><strong id="funds">$700</strong></div><div class="metric"><small>Income / sec</small><strong id="income">+$1.2</strong></div><div class="metric"><small>Incident</small><strong id="wave">1</strong></div><div class="metric"><small>Time</small><strong id="clock">00:00</strong></div></div></div><div class="layout"><div><div class="mapwrap" id="mapwrap"><canvas id="map" width="2000" height="1300" aria-label="Firefighting strategy game map"></canvas><div class="overlay" id="overlay"><div class="overlay-inner"><div class="big">🚒🌲</div><h1 id="overlayTitle">HOLD THE FIRELINE</h1><p id="overlayText">Protect at least 8 of 12 homes as wildfire incidents get harder.</p><button class="primary" id="start" style="padding:15px 30px;font-size:16px">START INCIDENT</button></div></div></div><div class="footer"><div class="legend"><span><i class="dot" style="background:#e95730"></i>Fire</span><span><i class="dot" style="background:#76b9ee"></i>Water</span><span><i class="dot" style="background:#d7d2ab"></i>Firebreak</span><span><i class="dot" style="background:#f0d9ad"></i>Homes</span></div><div><button id="pause">⏸ Pause</button> <button id="speed">1× Speed</button> <button id="restart">↻ Restart</button> <button id="fullscreen" type="button">⛶ Fullscreen</button><p id="fullHint" role="status" hidden></p></div></div></div><div class="side"><details class="panel"><summary>Game &amp; map settings</summary><div class="tips">New operation settings (apply on restart)</div><label>Mode <select id="gameMode"><option value="campaign">Campaign</option><option value="sandbox">Sandbox</option></select></label><br><label>Difficulty <select id="difficultySelect"><option value=".65">Beginner</option><option value="1" selected>Normal</option><option value="1.5">Hard</option><option value="2.2">Extreme</option></select></label><div class="xp-control"><label>Sandbox funds<input id="sandboxBudget" type="number" min="700" max="1000000" value="5000"></label><label>Wind mph<input id="sandboxWind" type="number" min="0" max="100" value="20"></label><label>Ignitions<input id="sandboxIgnitions" type="number" min="1" max="80" value="8"></label></div><div class="actions"><button id="applySettings" class="wide">New operation</button><button id="saveGame">Save</button><button id="loadGame">Resume save</button><button id="zoomIn">Zoom +</button><button id="zoomOut">Zoom −</button><button id="panToggle">Pan mode</button><button id="resetView">Fit map</button><button id="forecastToggle">Fire forecast</button><button id="terrainToggle">Elevation</button></div><div id="settingsStatus" class="tips" role="status"></div></details><div class="panel"><h3>Incident overview</h3><div id="incidentStats" class="tips" aria-live="off"></div><div class="bar"><i id="containmentBar" style="width:0%"></i></div><div class="tips">Containment is the protected share of active fire tiles, not a real-world perimeter measurement.</div></div><div class="panel"><h3>Orders</h3><div class="actions"><button data-order="move">➤ Move</button><button data-order="attack" class="selected">💦 Suppress</button><button data-order="break">⛏ Cut Line</button><button data-order="refill">🚰 Refill</button><button data-order="defend" class="wide">🛡 Defend Location</button></div><div id="orderDescription" class="tips" style="margin-top:10px">Move: select a destination for your crew or engine.</div></div><div class="panel"><h3>Cheats</h3>
 <button id="toggleCheats" type="button" aria-expanded="false" aria-controls="cheatGate cheatMenu">Open Cheat Menu</button>
 <form id="cheatGate" hidden>
   <div class="xp-control">
@@ -85,6 +85,7 @@ button:focus-visible{outline:2px solid #ffd27c;outline-offset:2px}
 (()=>{'use strict';const canvas=document.querySelector('#map'),ctx=canvas.getContext('2d'),W=2000,H=1300,C=25,COLS=W/C,ROWS=H/C,TWO=Math.PI*2;const $=id=>document.getElementById(id);const types={engine:{label:"Brush Engine",icon:"🚒",cost:250,speed:67,capacity:100,range:105,power:.15,delay:.20},crew:{label:"Hand Crew",icon:"👷",cost:160,speed:48,capacity:65,range:65,power:.10,delay:.31},dozer:{label:"Dozer",icon:"▰",cost:320,speed:44,capacity:0,range:0,power:0,delay:1},helicopter:{label:"Helicopter",icon:"🚁",cost:520,speed:120,capacity:60,range:65,power:.24,delay:2.1},tanker:{label:"Air Tanker",icon:"✈️",cost:760,speed:140,capacity:1,range:35,power:.28,delay:15}};Object.assign(types,{scooper:{label:'Super Scooper',icon:'✈',cost:1200,speed:155,capacity:100,range:65,power:.42,delay:1.8},heavy:{label:'Heavy-lift Helicopter',icon:'🚁',cost:950,speed:105,capacity:120,range:75,power:.46,delay:2.1},tender:{label:'Water Tender',icon:'🚛',cost:450,speed:57,capacity:240,range:0,power:0,delay:1},chief:{label:'Battalion Chief',icon:'🚙',cost:600,speed:75,capacity:0,range:0,power:0,delay:1},airattack:{label:'Air Attack',icon:'✈',cost:850,speed:155,capacity:0,range:0,power:0,delay:1}});
 const isRotor=u=>u.type==='helicopter'||u.type==='heavy';
 const isWaterAir=u=>isRotor(u)||u.type==='scooper';
+let gameMode='campaign',difficultyScale=1,sandboxWind=20,sandboxBudget=5000,sandboxIgnitions=8,viewZoom=1,viewX=1000,viewY=650,panMode=false,forecastOn=false,terrainOn=false;
 const training=[
   {xp:0,label:'Recruit'},
   {xp:25,label:'Trained'},
@@ -131,6 +132,7 @@ function windLabel(){
   return arrow+' '+name+' · '+windMph+' mph';
 }
 function updateWind(){
+  if(gameMode==='sandbox'){windMph=sandboxWind;return;}
   if(elapsed<nextWindShift)return;
   const turn=1+Math.floor(weatherRandom()*3);
   windDirection=(windDirection+(weatherRandom()<.5?-turn:turn)+8)%8;
@@ -233,12 +235,14 @@ if(unitLimits[building.type]){
 msg(spec.name+' constructed! '+(spec.rate?'Income +$'+(spec.rate/(1+.18*(wave-1))).toFixed(2)+'/sec.':'Your response network is stronger.'));buildingMode=null;document.querySelectorAll('[data-build]').forEach(b=>b.classList.remove('selected'));refreshUI()}
 const grassFire = {spread:1.45, growth:.065, peak:.6};
 const forestFire = {spread:.55, growth:.045, peak:1};
+const brushFire={...grassFire,spread:grassFire.spread*1.15,peak:grassFire.peak*1.1};
+const crownFire={...forestFire,spread:forestFire.spread*1.2,growth:forestFire.growth*1.15};
 function fireBehavior(tile){
-  return tile.tree ? forestFire : grassFire;
+  return tile.tree?(tile.vegetation==='crown'?crownFire:forestFire):tile.vegetation==='brush'?brushFire:grassFire;
 }
 
 function difficulty(){
-  return Math.log2(wave);
+  return Math.max(0,Math.log2(wave)*difficultyScale+(difficultyScale-1));
 }
 
 function spawnIncident(incident=wave+1, awardBonus=true){
@@ -327,7 +331,7 @@ function generateMap(){
       const tree=!water&&!road&&!cleared&&rnd()<(x<COLS/2?.68:.36);
       // Building footprints remain ordinary flammable ground, not automatic firebreaks.
       // Only player-issued cutting orders can create a firebreak.
-      const tile={x,y,tree,water,road,bridge,fire:0,fuel:water||road?0:rand(.65,1.3),
+      const tile={x,y,tree,water,road,bridge,elevation:Math.round(120+65*Math.sin(x*.095)+50*Math.cos(y*.12)+35*Math.sin((x+y)*.08)),vegetation:tree?((x+y)%7===0?'crown':'timber'):((x*7+y*3)%5===0?'brush':'grass'),fire:0,fuel:water||road?0:rand(.65,1.3),
         burnt:false,break:false,wet:0,rewarded:false,credited:false};
       if(airportFootprints.has(index))markAirportTile(tile);
       tiles.push(tile);
@@ -360,8 +364,8 @@ function generateMap(){
   }
 }
 
-function reset(){waterDropFlight=null;airDropReadyAt=0;unitPurchases={};perimeterPlans=[];windDirection=1;windMph=14;nextWindShift=24;weatherSeed=671;containmentDirty=true;seed=42;tiles=[];units=[];homes=[];particles=[];buildings=[];buildingMode=null;wave=1;waveTimer=0;suppressionEarned=0;selected=0;selectedGroup=new Set([0]);dragSelection=null;order='attack';funds=700;unlimitedWater=false;freezeSpread=false;uiTimer=0;elapsed=0;simAccum=0;paused=true;speed=1;ended=false;started=false;airDrop=false;fireTotal=0;burnout=0;generateMap();const firstFires=tiles.filter(t=>t.x>=22&&t.x<=37&&t.y>=9&&t.y<=32&&t.fuel>.3&&!t.structure);
-for(let k=0;k<8&&firstFires.length;k++){
+function reset(){waterDropFlight=null;airDropReadyAt=0;unitPurchases={};perimeterPlans=[];windDirection=1;windMph=14;nextWindShift=24;weatherSeed=671;containmentDirty=true;seed=42;tiles=[];units=[];homes=[];particles=[];buildings=[];buildingMode=null;wave=1;waveTimer=0;suppressionEarned=0;selected=0;selectedGroup=new Set([0]);dragSelection=null;order='attack';funds=gameMode==='sandbox'?sandboxBudget:700;unlimitedWater=false;freezeSpread=false;uiTimer=0;elapsed=0;simAccum=0;paused=true;speed=1;ended=false;started=false;airDrop=false;fireTotal=0;burnout=0;generateMap();const firstFires=tiles.filter(t=>t.x>=22&&t.x<=37&&t.y>=9&&t.y<=32&&t.fuel>.3&&!t.structure);
+for(let k=0;k<(gameMode==='sandbox'?sandboxIgnitions:8)&&firstFires.length;k++){
   const [tile]=firstFires.splice(Math.floor(rnd()*firstFires.length),1);
   tile.fire=Math.min(fireBehavior(tile).peak,rand(.45,.9));
 }
@@ -643,7 +647,7 @@ function positionTile(x,y){
 
 function terrainCost(tile,type){
   if(tile.road||tile.dozerCleared)return 2;
-  return type==='dozer'?3:4;
+  return (type==='dozer'?3:4)+(Math.abs((tile.elevation||0)-(at(tile.x-1,tile.y)?.elevation??tile.elevation??0))>5?1:0);
 }
 
 function groundPassable(tile){
@@ -804,7 +808,7 @@ function chooseHelicopterTarget(u,range){
     const d=dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2);
     if(d>=range)continue;
     const neighbors=spreadNeighbors.filter(([x,y])=>at(t.x+x,t.y+y)?.fire>.02).length;
-    const value=(structureRisk.get(t)||0)+t.fire*40+(neighbors<=1?100:0)+(t.retardant>0?25:0)-d*.45;
+    const value=(structureRisk.get(t)||0)+t.fire*40+(t.spotFire?120:0)+(neighbors<=1?100:0)+(t.retardant>0?25:0)-d*.45;
     if(value>score){best=t;score=value;}
   }
   if(best||range>types.helicopter.range)u.heliTarget=best;
@@ -1324,7 +1328,8 @@ function spreadFire(dt,heat){
       }
       if(!target||target.water||target.break||(target.road&&!target.structure)||target.fuel<=0||target.fire>.1)continue;
       const protection=(target.wet>0?.04:1)*(target.retardant>0?.12:1);
-      const chance=spreadRate*source.fire*windSpread(dx,dy)*fireBehavior(target).spread*protection*spotting;
+      const slope=Math.max(.7,Math.min(1.45,1+((target.elevation||0)-(source.elevation||0))*.025));
+      const chance=spreadRate*source.fire*windSpread(dx,dy)*fireBehavior(target).spread*protection*spotting*slope;
       if(rnd()<chance){
         target.fire=.2;
         target.rewarded=false;
@@ -1334,6 +1339,16 @@ function spreadFire(dt,heat){
   }
 }
 
+function emberSpotting(dt){
+  if(windMph<22)return;
+  const [,,wx,wy]=windDirections[windDirection];
+  for(const f of tiles){
+    if(f.fire<.65||rnd()>dt*.0008*(windMph-20)*(f.tree?1.5:1))continue;
+    const reach=3+Math.floor(rnd()*Math.min(5,windMph/12));
+    const t=at(f.x+Math.round(wx*reach),f.y+Math.round(wy*reach));
+    if(t&&!t.water&&!t.break&&!t.road&&t.fuel>0&&t.fire<=.02&&!(t.retardant>0)&&!(t.wet>0)){t.fire=.16;t.spotFire=true;t.credited=false;t.rewarded=false;}
+  }
+}
 function dispatchWaterDrop(x,y){
   airDrop=false;
   if(funds>=airDropCost&&!airDropSecondsLeft()&&!waterDropFlight){
@@ -1424,11 +1439,11 @@ function update(dt){const heat=difficulty();elapsed+=dt;funds+=dt*income();waveT
   t.fuel=Math.max(.03,t.fuel-dt*rate*(.8+t.fire));
   const fire=fireBehavior(t);
   t.fire=Math.min(fire.peak,t.fire+dt*fire.growth);
-}}if(!freezeSpread)spreadFire(dt,heat);
-for(let h of homes)if(!h.burnt){let t=at(h.x,h.y);if(t.fire>.05||t.burnt){h.hp=t.burnt?0:h.hp-dt*18*t.fire;if(h.hp<=0){h.burnt=true;msg('Structure lost! Protect the remaining homes.')}}}const hasFire=tiles.some(t=>t.fire>.02);if(!hasFire)perimeterPlans=[];else updateStructureRisk();for(const u of units)updateUnit(u,dt,hasFire);for(let b of buildings){if(b.type==='water')for(let u of units)if(!isAir(u)&&dist(b.x,b.y,u.x,u.y)<78)u.water=Math.min(u.capacity,u.water+dt*12)}particles=particles.filter(p=>(p.life-=dt)>0);fireTotal=tiles.reduce((s,t)=>s+(t.fire>.02?1:0),0);const destroyed=homes.filter(h=>h.burnt).length;if(destroyed>=5){end()}
+}}if(!freezeSpread){spreadFire(dt,heat);emberSpotting(dt);}
+for(let h of homes)if(!h.burnt){let t=at(h.x,h.y);if(t.fire>.05||t.burnt){h.hp=t.burnt?0:h.hp-dt*18*t.fire;if(h.hp<=0){h.burnt=true;msg('Structure lost! Protect the remaining homes.')}}}const hasFire=tiles.some(t=>t.fire>.02);if(!hasFire)perimeterPlans=[];else updateStructureRisk();for(const u of units)updateUnit(u,dt,hasFire);for(let b of buildings){if(b.type==='water')for(let u of units)if(!isAir(u)&&dist(b.x,b.y,u.x,u.y)<78)u.water=Math.min(u.capacity,u.water+dt*12)}particles=particles.filter(p=>(p.life-=dt)>0);fireTotal=tiles.reduce((s,t)=>s+(t.fire>.02?1:0),0);const destroyed=homes.filter(h=>h.burnt).length;if(destroyed>=5&&gameMode==='campaign'){end()}
 else if(fireTotal===0){
   burnout+=dt;
-  if(burnout>=Math.max(4,12-1.45*heat)&&!waterDropFlight)spawnIncident();
+  if(gameMode==='campaign'&&burnout>=Math.max(4,12-1.45*heat)&&!waterDropFlight)spawnIncident();
 }else{
   burnout=0;
 }
@@ -1680,7 +1695,7 @@ function drawForestTree(t,x,y){
   }
   ctx.restore();
 }
-function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#344c32';ctx.fillRect(0,0,W,H);for(let t of tiles){let x=t.x*C,y=t.y*C;if(t.bridge){
+function draw(){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.save();ctx.translate(W/2,H/2);ctx.scale(viewZoom,viewZoom);ctx.translate(-viewX,-viewY);ctx.fillStyle='#344c32';ctx.fillRect(0,0,W,H);for(let t of tiles){let x=t.x*C,y=t.y*C;if(t.bridge){
       // Water flows underneath a distinct deck and guardrails.
       const across=Boolean(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road);
       ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);
@@ -1694,15 +1709,23 @@ function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#344c32';ctx.fillRect(0,0,
         ctx.fillStyle='#e0d0ab';ctx.fillRect(x+2,y,3,C);ctx.fillRect(x+C-5,y,3,C);
         ctx.fillStyle='#d2c99b';ctx.fillRect(x+11,y+5,2,C-10);
       }
-    }else if(t.water){ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);ctx.fillStyle='#70b1c780';ctx.fillRect(x+2,y+9,C-4,2)}else if(t.road){ctx.fillStyle='#666963';ctx.fillRect(x,y,C,C);ctx.fillStyle='#d2c99b';if(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road)ctx.fillRect(x+8,y+11,9,2);if(at(t.x,t.y-1)?.road||at(t.x,t.y+1)?.road)ctx.fillRect(x+11,y+8,2,9)}else{ctx.fillStyle=t.burnt?'#272b26':t.break?'#795034':(t.tree?(t.x+t.y)%3===0?'#355632':'#3d613c':'#658157');ctx.fillRect(x,y,C,C);if(t.tree&&!t.burnt&&!t.break)drawForestTree(t,x,y);}if(t.retardant>0){ctx.fillStyle='rgba(230,80,112,.65)';ctx.fillRect(x,y,C,C)}if(t.wet>1){ctx.fillStyle='rgba(86,178,226,.22)';ctx.fillRect(x,y,C,C)}if(t.fire>.02)drawWildfire(t,x,y);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='airport'){drawAirport(b);continue}if(b.type==='station'){drawStation(b);continue}if(b.type==='water'){drawWaterTower(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'||u.type==='tanker'||u.type==='dozer'){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='tanker'||u.type==='scooper'||u.type==='airattack'){drawTankerSprite(u)}else if(u.type==='dozer'){drawDozerSprite(u)}else if(u.type==='engine'){drawEngineSprite(u)}else if(isRotor(u)){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'&&u.type!=='tanker'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}}function coords(e){
+    }else if(t.water){ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);ctx.fillStyle='#70b1c780';ctx.fillRect(x+2,y+9,C-4,2)}else if(t.road){ctx.fillStyle='#666963';ctx.fillRect(x,y,C,C);ctx.fillStyle='#d2c99b';if(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road)ctx.fillRect(x+8,y+11,9,2);if(at(t.x,t.y-1)?.road||at(t.x,t.y+1)?.road)ctx.fillRect(x+11,y+8,2,9)}else{ctx.fillStyle=t.burnt?'#272b26':t.break?'#795034':(t.tree?(t.x+t.y)%3===0?'#355632':'#3d613c':'#658157');ctx.fillRect(x,y,C,C);if(t.tree&&!t.burnt&&!t.break)drawForestTree(t,x,y);}if(t.retardant>0){ctx.fillStyle='rgba(230,80,112,.65)';ctx.fillRect(x,y,C,C)}if(t.wet>1){ctx.fillStyle='rgba(86,178,226,.22)';ctx.fillRect(x,y,C,C)}if(terrainOn&&!t.water){ctx.fillStyle='rgba(230,220,165,'+Math.max(0,Math.min(.22,(t.elevation-50)/900))+')';ctx.fillRect(x,y,C,C);}
+if(forecastOn&&t.fire<=.02&&!t.water&&!t.break&&t.fuel>0&&spreadNeighbors.some(([dx,dy])=>at(t.x-dx,t.y-dy)?.fire>.02&&windAlignment(dx,dy)>.3)){ctx.fillStyle='#ffb52d55';ctx.fillRect(x,y,C,C);}
+if(t.fire>.02)drawWildfire(t,x,y);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='airport'){drawAirport(b);continue}if(b.type==='station'){drawStation(b);continue}if(b.type==='water'){drawWaterTower(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'||u.type==='tanker'||u.type==='dozer'){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='tanker'||u.type==='scooper'||u.type==='airattack'){drawTankerSprite(u)}else if(u.type==='dozer'){drawDozerSprite(u)}else if(u.type==='engine'){drawEngineSprite(u)}else if(isRotor(u)){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'&&u.type!=='tanker'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}ctx.restore();const darkness=.20*(1-Math.cos((elapsed%240)/240*TWO))/2;ctx.fillStyle='rgba(8,15,40,'+darkness+')';ctx.fillRect(0,0,W,H);
+}function coords(e){
   const r=canvas.getBoundingClientRect();
   const scale=Math.min(r.width/W,r.height/H);
   return {
-    x:(e.clientX-r.left-(r.width-W*scale)/2)/scale,
-    y:(e.clientY-r.top-(r.height-H*scale)/2)/scale
+    x:((e.clientX-r.left-(r.width-W*scale)/2)/scale-W/2)/viewZoom+viewX,
+    y:((e.clientY-r.top-(r.height-H*scale)/2)/scale-H/2)/viewZoom+viewY
   };
 }canvas.addEventListener('contextmenu',event=>event.preventDefault());
+let panDrag=null;const touches=new Map();let pinch=null;
+function clampView(){viewX=Math.max(W/(2*viewZoom),Math.min(W-W/(2*viewZoom),viewX));viewY=Math.max(H/(2*viewZoom),Math.min(H-H/(2*viewZoom),viewY));}
+function zoomBy(f){viewZoom=Math.max(1,Math.min(3,viewZoom*f));clampView();}
 canvas.addEventListener('pointerdown',event=>{
+  if(event.pointerType==='touch'){touches.set(event.pointerId,{x:event.clientX,y:event.clientY});if(touches.size===2){const [a,b]=touches.values();pinch={distance:dist(a.x,a.y,b.x,b.y),zoom:viewZoom};dragSelection=null;panDrag=null;canvas.setPointerCapture?.(event.pointerId);return;}}
+  if(panMode){panDrag={id:event.pointerId,x:event.clientX,y:event.clientY};canvas.setPointerCapture?.(event.pointerId);return;}
   if(!started||ended||![0,2].includes(event.button))return;
   event.preventDefault();
   const p=coords(event);
@@ -1713,12 +1736,16 @@ canvas.addEventListener('pointerdown',event=>{
   canvas.setPointerCapture?.(event.pointerId);
 });
 canvas.addEventListener('pointermove',event=>{
+  if(touches.has(event.pointerId))touches.set(event.pointerId,{x:event.clientX,y:event.clientY});
+  if(pinch&&touches.size>=2){const [a,b]=touches.values();viewZoom=Math.max(1,Math.min(3,pinch.zoom*dist(a.x,a.y,b.x,b.y)/Math.max(1,pinch.distance)));clampView();return;}
+  if(panDrag?.id===event.pointerId){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/W,r.height/H)*viewZoom;viewX-=(event.clientX-panDrag.x)/scale;viewY-=(event.clientY-panDrag.y)/scale;panDrag.x=event.clientX;panDrag.y=event.clientY;clampView();return;}
   if(!dragSelection||event.pointerId!==dragSelection.id)return;
   const p=coords(event);
   dragSelection.current={x:Math.max(0,Math.min(W,p.x)),y:Math.max(0,Math.min(H,p.y))};
   if(dist(dragSelection.start.x,dragSelection.start.y,p.x,p.y)>14)dragSelection.dragging=true;
 });
 canvas.addEventListener('pointerup',event=>{
+  touches.delete(event.pointerId);if(pinch){if(!touches.size)pinch=null;return;}if(panDrag?.id===event.pointerId){panDrag=null;return;}
   if(!dragSelection||event.pointerId!==dragSelection.id)return;
   const drag=dragSelection;dragSelection=null;
   const p=coords(event);
@@ -1737,7 +1764,7 @@ canvas.addEventListener('pointerup',event=>{
   }
   doOrder(p.x,p.y);
 });
-canvas.addEventListener('pointercancel',()=>{dragSelection=null});
+canvas.addEventListener('pointercancel',()=>{dragSelection=null;panDrag=null;touches.clear();pinch=null;});
 document.querySelectorAll('[data-order]').forEach(b=>b.onclick=()=>setOrder(b.dataset.order));for(const [id,type] of Object.entries(recruitButtons)){
 $(id).onclick=()=>{
 const spec=types[type],cost=unitCost(type);if(!started||ended||funds<cost)return;
@@ -1856,6 +1883,23 @@ $('cheatContain').onclick=()=>{
   refreshUI();
 };
 $('airdrop').onclick=()=>{if(funds<airDropCost||ended||!started||airDropSecondsLeft()||waterDropFlight)return;buildingMode=null;document.querySelectorAll('[data-build]').forEach(b=>b.classList.remove('selected'));airDrop=true;msg('Select a target for the one-time water drop.')};document.querySelectorAll('[data-build]').forEach(b=>b.onclick=()=>{if(ended||!started||funds<buildingCost(b.dataset.build))return;buildingMode=b.dataset.build;airDrop=false;document.querySelectorAll('[data-build]').forEach(bb=>bb.classList.toggle('selected',bb===b));msg('Tap open ground to place '+BUILDINGS[buildingMode].name+'.');refreshUI()});$('cancelBuild').onclick=()=>{buildingMode=null;document.querySelectorAll('[data-build]').forEach(b=>b.classList.remove('selected'));refreshUI()};$('start').onclick=()=>{if(ended)reset();started=true;paused=false;$('overlay').classList.add('hidden');$('pause').textContent='⏸ Pause';refreshUI()};$('pause').onclick=()=>{if(!started||ended)return;paused=!paused;$('pause').textContent=paused?'▶ Resume':'⏸ Pause';msg(paused?'Simulation paused.':'Simulation resumed.')};$('speed').onclick=()=>{speed=speed===1?2:speed===2?3:1;$('speed').textContent=speed+'× Speed'};$('restart').onclick=()=>{if(!started||ended||confirm('Restart the current operation?'))reset()};const fullButton=$('fullscreen'),fullHint=$('fullHint');
+$('zoomIn').onclick=()=>zoomBy(1.25);$('zoomOut').onclick=()=>zoomBy(.8);
+$('resetView').onclick=()=>{viewZoom=1;viewX=W/2;viewY=H/2;};
+$('panToggle').onclick=()=>{panMode=!panMode;$('panToggle').classList.toggle('selected',panMode);};
+$('forecastToggle').onclick=()=>{forecastOn=!forecastOn;$('forecastToggle').classList.toggle('selected',forecastOn);};
+$('terrainToggle').onclick=()=>{terrainOn=!terrainOn;$('terrainToggle').classList.toggle('selected',terrainOn);};
+$('applySettings').onclick=()=>{if(started&&!ended&&!confirm('Start a new operation?'))return;gameMode=$('gameMode').value;difficultyScale=Number($('difficultySelect').value);sandboxBudget=Math.max(700,Math.min(1000000,Number($('sandboxBudget').value)||5000));sandboxWind=Math.max(0,Math.min(100,Number($('sandboxWind').value)||0));sandboxIgnitions=Math.max(1,Math.min(80,Math.floor(Number($('sandboxIgnitions').value)||8)));reset();};
+function saveSnapshot(){
+  const cleanUnits=units.map(u=>{const {homeBase,route,routeGoal,perimeter,perimeterPlan,heliTarget,heliOrbit,tankerRun,tankerOrbit,...plain}=u;return {...plain,homeIndex:buildings.indexOf(homeBase),mode:plain.mode==='perimeter'?'move':plain.mode};});
+  return {version:1,tiles,homes,buildings,units:cleanUnits,reservoir,wave,waveTimer,elapsed,funds,seed,windDirection,windMph,nextWindShift,weatherSeed,suppressionEarned,unitPurchases,gameMode,difficultyScale,sandboxBudget,sandboxWind,sandboxIgnitions,unlimitedWater,freezeSpread,fireTotal};
+}
+$('saveGame').onclick=()=>{try{if(!started||ended)throw Error('Start an active incident first.');localStorage.setItem('fireline-save-v1',JSON.stringify(saveSnapshot()));$('settingsStatus').textContent='Operation saved on this device.';}catch(e){$('settingsStatus').textContent='Save failed: '+e.message;}};
+$('loadGame').onclick=()=>{try{
+ const d=JSON.parse(localStorage.getItem('fireline-save-v1')||'null');if(!d||d.version!==1||d.tiles?.length!==COLS*ROWS||!Array.isArray(d.units)||!d.units.every(u=>types[u.type]))throw Error('No compatible save.');
+ if(started&&!ended&&!confirm('Replace the current operation with your save?'))return;
+ reset();tiles=d.tiles;homes=d.homes;buildings=d.buildings;units=d.units.map(u=>({...u,homeBase:buildings[u.homeIndex],route:null,perimeter:null,heliTarget:null,tankerRun:null}));reservoir=d.reservoir;wave=d.wave;waveTimer=d.waveTimer;elapsed=d.elapsed;funds=d.funds;seed=d.seed;windDirection=d.windDirection;windMph=d.windMph;nextWindShift=d.nextWindShift;weatherSeed=d.weatherSeed;suppressionEarned=d.suppressionEarned;unitPurchases=d.unitPurchases;gameMode=d.gameMode;difficultyScale=d.difficultyScale;sandboxBudget=d.sandboxBudget;sandboxWind=d.sandboxWind;sandboxIgnitions=d.sandboxIgnitions;unlimitedWater=d.unlimitedWater;freezeSpread=d.freezeSpread;fireTotal=d.fireTotal;containmentDirty=true;checkContainment();updateStructureRisk();started=true;paused=true;ended=false;selectedGroup=new Set([0]);selected=0;$('overlay').classList.add('hidden');$('pause').textContent='▶ Resume';$('gameMode').value=gameMode;$('difficultySelect').value=String(difficultyScale);refreshUI();$('settingsStatus').textContent='Saved operation loaded. Press Resume.';
+ }catch(e){$('settingsStatus').textContent='Load failed: '+e.message;}};
+
 const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 fullButton.hidden=standalone;
 function activeFullscreen(){
