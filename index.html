@@ -1141,26 +1141,30 @@ function drawEngineSprite(u){
   ctx.fillStyle='#ff8d77';ctx.fillRect(2,-4,1,8);
   ctx.restore();
 }
+function helicopterHoverOffset(u){
+  return u.type==='helicopter'&&u.mode==='refill'&&!u.waitingForWater&&u.water<u.capacity&&dist(u.x,u.y,u.tx,u.ty)<=8&&positionTile(u.tx,u.ty)?.water?C:0;
+}
 function drawHelicopterSprite(u){
-  const snorkel=u.mode==='refill'&&!u.waitingForWater&&u.water<u.capacity&&dist(u.x,u.y,u.tx,u.ty)<=8&&positionTile(u.tx,u.ty)?.water;
-  if(snorkel){
-    const clock=renderPrev*.001, sway=Math.sin(clock*4)*1.5;
+  const lift=helicopterHoverOffset(u);
+  if(lift){
+    const clock=renderPrev*.001,sway=Math.sin(clock*4)*2;
     const dx=u.tx-u.x,dy=u.ty-u.y;
-    // Draw the hanging snorkel in screen space so it remains vertical as the aircraft turns.
     ctx.save();ctx.translate(u.x,u.y);
-    ctx.strokeStyle='#17272e';ctx.lineWidth=3.5;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(0,3);ctx.quadraticCurveTo(sway,10,dx*.5,dy*.5+13);ctx.stroke();
-    ctx.strokeStyle='#b5c7c9';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(0,3);ctx.quadraticCurveTo(sway,10,dx*.5,dy*.5+13);ctx.stroke();
-    ctx.fillStyle='#394b50';ctx.fillRect(dx*.5-2,dy*.5+11,4,5);
-    for(let j=0;j<2;j++){
-      const p=(clock*1.4+j*.5)%1;
-      ctx.strokeStyle='rgba(173,230,249,'+(.65*(1-p))+')';ctx.lineWidth=1;
-      ctx.beginPath();ctx.ellipse(dx*.5,dy*.5+16,2+p*9,1+p*4,0,0,TWO);ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(dx,dy,12,5,0,0,TWO);ctx.fill();
+    for(let j=0;j<3;j++){
+      const p=(clock*1.4+j/3)%1;
+      ctx.strokeStyle='rgba(190,239,255,'+(.8*(1-p))+')';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.ellipse(dx,dy,3+p*12,2+p*6,0,0,TWO);ctx.stroke();
     }
+    ctx.lineCap='round';ctx.strokeStyle='#17272e';ctx.lineWidth=6;
+    ctx.beginPath();ctx.moveTo(0,-lift+3);ctx.quadraticCurveTo(sway,-lift/2,dx,dy);ctx.stroke();
+    ctx.strokeStyle='#f0c75b';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(0,-lift+3);ctx.quadraticCurveTo(sway,-lift/2,dx,dy);ctx.stroke();
+    ctx.fillStyle='#253d46';ctx.fillRect(dx-3,dy-4,6,7);
+    ctx.fillStyle='#d5e7ea';ctx.fillRect(dx-2,dy-1,4,2);
     ctx.restore();
   }
-  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);
+  ctx.save();ctx.translate(u.x,u.y-lift);ctx.rotate(u.heading??0);
   ctx.fillStyle='#30383c';ctx.fillRect(-19,-2,17,4);
   ctx.fillStyle='#e4d9bd';ctx.fillRect(-20,-7,3,10);
   ctx.strokeStyle='#202b30';ctx.lineWidth=2;
@@ -1224,7 +1228,7 @@ function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#344c32';ctx.fillRect(0,0,
         ctx.fillStyle='#e0d0ab';ctx.fillRect(x+2,y,3,C);ctx.fillRect(x+C-5,y,3,C);
         ctx.fillStyle='#d2c99b';ctx.fillRect(x+11,y+5,2,C-10);
       }
-    }else if(t.water){ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);ctx.fillStyle='#70b1c780';ctx.fillRect(x+2,y+9,C-4,2)}else if(t.road){ctx.fillStyle='#666963';ctx.fillRect(x,y,C,C);ctx.fillStyle='#d2c99b';if(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road)ctx.fillRect(x+8,y+11,9,2);if(at(t.x,t.y-1)?.road||at(t.x,t.y+1)?.road)ctx.fillRect(x+11,y+8,2,9)}else{ctx.fillStyle=t.burnt?'#272b26':t.break?'#bea97b':(t.tree?(t.x+t.y)%3===0?'#355632':'#3d613c':'#658157');ctx.fillRect(x,y,C,C);if(t.tree&&!t.burnt&&!t.break){ctx.fillStyle='#244e35';ctx.beginPath();ctx.arc(x+13,y+13,7+(t.x%3),0,TWO);ctx.fill();ctx.fillStyle='#678e47';ctx.beginPath();ctx.arc(x+11,y+10,3,0,TWO);ctx.fill()}}if(t.retardant>0){ctx.fillStyle='rgba(230,80,112,.65)';ctx.fillRect(x,y,C,C)}if(t.wet>1){ctx.fillStyle='rgba(86,178,226,.22)';ctx.fillRect(x,y,C,C)}if(t.fire>.02)drawWildfire(t,x,y);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='station'){drawStation(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'){drawSelectionCorners(u)}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='engine'){drawEngineSprite(u)}else if(u.type==='helicopter'){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21,28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21,28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}}function coords(e){
+    }else if(t.water){ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);ctx.fillStyle='#70b1c780';ctx.fillRect(x+2,y+9,C-4,2)}else if(t.road){ctx.fillStyle='#666963';ctx.fillRect(x,y,C,C);ctx.fillStyle='#d2c99b';if(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road)ctx.fillRect(x+8,y+11,9,2);if(at(t.x,t.y-1)?.road||at(t.x,t.y+1)?.road)ctx.fillRect(x+11,y+8,2,9)}else{ctx.fillStyle=t.burnt?'#272b26':t.break?'#bea97b':(t.tree?(t.x+t.y)%3===0?'#355632':'#3d613c':'#658157');ctx.fillRect(x,y,C,C);if(t.tree&&!t.burnt&&!t.break){ctx.fillStyle='#244e35';ctx.beginPath();ctx.arc(x+13,y+13,7+(t.x%3),0,TWO);ctx.fill();ctx.fillStyle='#678e47';ctx.beginPath();ctx.arc(x+11,y+10,3,0,TWO);ctx.fill()}}if(t.retardant>0){ctx.fillStyle='rgba(230,80,112,.65)';ctx.fillRect(x,y,C,C)}if(t.wet>1){ctx.fillStyle='rgba(86,178,226,.22)';ctx.fillRect(x,y,C,C)}if(t.fire>.02)drawWildfire(t,x,y);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='station'){drawStation(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='engine'){drawEngineSprite(u)}else if(u.type==='helicopter'){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}}function coords(e){
   const r=canvas.getBoundingClientRect();
   const scale=Math.min(r.width/W,r.height/H);
   return {
