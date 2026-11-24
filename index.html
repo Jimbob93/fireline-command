@@ -672,6 +672,27 @@ function groundRoute(start,goal,goalX,goalY,type,isGoal){
   return route;
 }
 
+function airAltitude(u){
+  if(u.type==='helicopter')return u.mode==='refill'?0:1;
+  return ['parked','ready','taxiOut','taxiPark','landing','takeoff'].includes(u.airportStage)?0:u.tankerRun?.dropping?2:3+(u.airportBay||0);
+}
+function airSeparation(u,x,y,step){
+  // Keep low-level operations and distinct cruise lanes separate. Yield deterministically.
+  const alt=airAltitude(u),index=units.indexOf(u);
+  if(!alt||u.tankerRun?.dropping||u.type==='tanker'&&u.airportStage!=='flight'&&u.airportStage!=='holding')return {x,y};
+  const angle=Math.atan2(y-u.y,x-u.x);
+  for(const v of units){
+    if(v===u||v.health<=0||!isAir(v)||airAltitude(v)!==alt)continue;
+    const d=dist(u.x,u.y,v.x,v.y);
+    const forward=(v.x-u.x)*Math.cos(angle)+(v.y-u.y)*Math.sin(angle);
+    if(d>80||forward<0&&d>32)continue;
+    if(units.indexOf(v)>index&&!v.tankerRun?.dropping&&d>36)continue;
+    const side=index%2?1:-1;
+    const offset=Math.min(65,Math.max(25,80-d));
+    return {x:Math.max(1,Math.min(W-1,x-Math.sin(angle)*offset*side)),y:Math.max(1,Math.min(H-1,y+Math.cos(angle)*offset*side))};
+  }
+  return {x,y};
+}
 function moveUnit(u,step,airStop=7){
   const current=positionTile(u.x,u.y);
   const goal=positionTile(u.tx,u.ty);
@@ -689,7 +710,19 @@ function moveUnit(u,step,airStop=7){
     u.y=ny;
     return true;
   };
-  if(airborne||!current){advance(u.tx,u.ty,airStop);return}
+  if(airborne||!current){
+    const old=u.heading??Math.atan2(u.ty-u.y,u.tx-u.x);
+    const gap=dist(u.x,u.y,u.tx,u.ty);
+    const target=gap>35?airSeparation(u,u.tx,u.ty,step):{x:u.tx,y:u.ty};
+    advance(target.x,target.y,airStop);
+    if(u.type==='tanker'){
+      const desired=u.heading??old,delta=Math.atan2(Math.sin(desired-old),Math.cos(desired-old));
+      const turn=Math.max(-step*.025,Math.min(step*.025,delta));
+      u.heading=old+turn;
+      u.bank=(u.bank||0)*.85+Math.max(-.55,Math.min(.55,delta))*.15;
+    }
+    return;
+  }
   if(u.routeGoal!==goal){u.route=null;u.routeGoal=goal;u.routeRetry=0}
   if(current===goal&&groundPassable(current)){advance(u.tx,u.ty,7);return}
   if(u.route?.some(tile=>!groundPassable(tile))){
@@ -739,6 +772,25 @@ function rerouteStalledDozer(u,dt){
   return true;
 }
 
+function chooseHelicopterTarget(u,range){
+  const reserved=new Set();
+  for(const v of units){
+    if(v===u||v.health<=0)continue;
+    if(v.type==='tanker'&&v.tankerRun)for(const t of v.tankerRun.footprint||[])reserved.add(t);
+    if(v.type==='helicopter'&&v.mode==='auto'&&v.water>0&&v.heliTarget?.fire>.02)reserved.add(v.heliTarget);
+  }
+  let best=null,score=-Infinity;
+  for(const t of tiles){
+    if(t.fire<=.02||reserved.has(t))continue;
+    const d=dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2);
+    if(d>=range)continue;
+    const neighbors=spreadNeighbors.filter(([x,y])=>at(t.x+x,t.y+y)?.fire>.02).length;
+    const value=(structureRisk.get(t)||0)+t.fire*40+(neighbors<=1?100:0)+(t.retardant>0?25:0)-d*.45;
+    if(value>score){best=t;score=value;}
+  }
+  if(best||range>types.helicopter.range)u.heliTarget=best;
+  return best;
+}
 function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   if(u.health<=0)return;
 
@@ -784,8 +836,9 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   }
 
   const range=types[u.type].range;
+  if(u.type==='helicopter'&&u.mode!=='auto')u.heliTarget=null;
   if(u.mode==='auto'){
-    const fire=nearestFire(u,u.type==='tanker'?Infinity:420,undefined,true);
+    const fire=u.type==='helicopter'?chooseHelicopterTarget(u,420):nearestFire(u,420,undefined,true);
     const chase=fire&&dist(u.x,u.y,fire.x*C+12,fire.y*C+12)>range*.8;
     u.tx=chase?fire.x*C+12:u.x;
     u.ty=chase?fire.y*C+12:u.y;
@@ -849,7 +902,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
     u.water=Math.min(u.capacity,u.water+dt*12);
   }
   if(u.type!=='tanker'&&u.mode!=='break'&&u.mode!=='refill'&&!(u.homeBase&&u.mode==='home')&&u.water>0&&u.cooldown<=0){
-    const fire=nearestFire(u,range,undefined,u.mode==='auto'||u.mode==='defend');
+    const fire=u.type==='helicopter'&&u.mode==='auto'?chooseHelicopterTarget(u,range):nearestFire(u,range,undefined,u.mode==='auto'||u.mode==='defend');
     if(fire){
       const x=fire.x*C+12,y=fire.y*C+12;
       u.cooldown=types[u.type].delay;
@@ -887,7 +940,7 @@ function updateAirportTanker(u,dt,perks,hasFire){
     (v.runwayQueuedAt<u.runwayQueuedAt||(v.runwayQueuedAt===u.runwayQueuedAt&&units.indexOf(v)<units.indexOf(u))));
   const parkingX=base.x+(u.airportBay===1?1:-1)*2*C,parkingY=base.y-C;
   const hold=()=>{
-    const radius=100;
+    const radius=100+(u.airportBay||0)*38;
     const cx=Math.max(radius+5,Math.min(W-radius-5,base.x));
     const cy=Math.max(radius+5,Math.min(H-radius-5,base.y));
     const angle=Math.atan2(u.y-cy,u.x-cx);
@@ -951,7 +1004,7 @@ function updateAirportTanker(u,dt,perks,hasFire){
     return;
   }
   if(flyTankerRun(u,dt,perks,hasFire))return;
-  const radius=85,assigned=['move','defend','attack'].includes(u.mode);
+  const radius=85+(u.airportBay||0)*30,assigned=['move','defend','attack'].includes(u.mode);
   if(!u.tankerOrbit||u.tankerOrbit.mode!==u.mode||(assigned&&(u.tankerOrbit.tx!==u.tx||u.tankerOrbit.ty!==u.ty))){
     u.tankerOrbit={cx:Math.max(radius+5,Math.min(W-radius-5,assigned?u.tx:u.x)),cy:Math.max(radius+5,Math.min(H-radius-5,assigned?u.ty:u.y)),mode:u.mode,tx:u.tx,ty:u.ty};
   }
@@ -984,6 +1037,7 @@ function chooseTankerMission(u){
   if(!max)return null;
   const manual=u.mode==='attack',ox=manual?u.tx:u.x,oy=manual?u.ty:u.y;
   const targets=new Map(),fires=tiles.filter(t=>t.fire>.02);
+  const heliTargets=new Set(units.filter(v=>v.type==='helicopter'&&v.health>0&&v.mode==='auto'&&v.water>0&&v.heliTarget?.fire>.02).map(v=>v.heliTarget));
   const add=(t,score,role)=>{
     if(!t||t.water||t.retardant>0||reserved.has(t))return;
     score-=dist(ox,oy,t.x*C+C/2,t.y*C+C/2)*.09+(roles[role]||0)*45;
@@ -992,7 +1046,7 @@ function chooseTankerMission(u){
   for(const f of fires){
     const risk=structureRisk.get(f)||0;
     const nearby=spreadNeighbors.filter(([x,y])=>at(f.x+x,f.y+y)?.fire>.02).length;
-    add(f,65+f.fire*35+risk*.5,nearby<=1?'Spot fire':risk>120?'Protecting structures':'Direct suppression');
+    if(!heliTargets.has(f))add(f,65+f.fire*35+risk*.5,nearby<=1?'Spot fire':risk>120?'Protecting structures':'Direct suppression');
     for(const [x,y] of spreadNeighbors){
       const t=at(f.x+x,f.y+y);
       if(!t||t.fire>.02||t.break||t.road||t.fuel<=0)continue;
@@ -1027,7 +1081,7 @@ function chooseTankerMission(u){
       if(dist(u.x,u.y,finish.x,finish.y)<dist(u.x,u.y,start.x,start.y))[start,finish]=[finish,start];
       const run={start,end:finish,role,amount:q*u.capacity/4,dropping:false,covered:new Set(),wind:windDirection,checkAt:elapsed+2,manual};
       const footprint=tankerFootprint(run);
-      if(!footprint.length||footprint.some(t=>reserved.has(t)))continue;
+      if(!footprint.length||footprint.some(t=>reserved.has(t)||heliTargets.has(t)))continue;
       let useful=0,overlap=0;
       for(const t of footprint){
         if(t.retardant>0){overlap++;continue;}
@@ -1353,7 +1407,7 @@ function drawCrewSprite(u){
   ctx.restore();
 }
 function drawTankerSprite(u){
-  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25);
+  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25*(1-Math.abs(u.bank||0)*.55));
   const shape=()=>{
     ctx.beginPath();ctx.moveTo(21,0);ctx.quadraticCurveTo(19,-4,12,-4);
     ctx.lineTo(3,-4);ctx.lineTo(-5,-19);ctx.lineTo(-11,-19);ctx.lineTo(-7,-4);
