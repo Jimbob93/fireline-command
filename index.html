@@ -1130,7 +1130,7 @@ function drawHelicopterSprite(u){
   ctx.fillStyle='#d84b37';ctx.beginPath();ctx.ellipse(3,0,12,7,0,0,TWO);ctx.fill();
   ctx.fillStyle='#a9d9e8';ctx.beginPath();ctx.ellipse(10,0,5,5,0,0,TWO);ctx.fill();
   ctx.fillStyle='#eee1bf';ctx.fillRect(-5,-2,8,4);
-  ctx.save();ctx.rotate(elapsed*15);ctx.strokeStyle='#dbe2df';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-19,0);ctx.lineTo(19,0);ctx.moveTo(0,-19);ctx.lineTo(0,19);ctx.stroke();ctx.restore();
+  ctx.save();ctx.rotate(renderPrev*0.009);ctx.fillStyle='#26363c';ctx.strokeStyle='#e4e9e7';ctx.lineWidth=1;for(let blade=0;blade<2;blade++){ctx.rotate(Math.PI);ctx.beginPath();ctx.moveTo(2,-1);ctx.lineTo(23,-2);ctx.lineTo(23,2);ctx.lineTo(2,1);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#f3ce59';ctx.fillRect(20,-1.5,3,3);ctx.fillStyle='#26363c';}ctx.restore();
   ctx.fillStyle='#28383d';ctx.fillRect(-2,-2,4,4);ctx.restore();
 }
 function drawSelectionCorners(u){
