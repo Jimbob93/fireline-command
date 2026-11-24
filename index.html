@@ -429,7 +429,7 @@ const u=units[i],container=$('units');
 let b=container.children[i];
 if(!b){b=document.createElement('button');b.type='button';b.dataset.unit=i;b.onclick=(event)=>{selectUnits([i],event.shiftKey);refreshUI()};container.appendChild(b)}
 b.className='unit'+(selectedGroup.has(i)?' active':'');b.disabled=u.health<=0;b.setAttribute('aria-pressed',selectedGroup.has(i));
-const status=u.health<=0?'Destroyed':u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
+const status=u.health<=0?'Destroyed':u.type==='chief'&&u.mode!=='retreat'?(u.chiefStatus||'Ready for dispatch'):u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
 const value=u.type==='tanker'?'Retardant '+Math.round(100*u.water/u.capacity)+'%':u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
 const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
 if(b.innerHTML!==html)b.innerHTML=html;
@@ -463,10 +463,10 @@ refreshAirDropButton();document.querySelectorAll('[data-build]').forEach(b=>{b.d
   refreshUI();
 }
 function issueUnitOrder(u,x,y,command){
-  if(command==='break'&&isAir(u))return false;
+  if(command==='break'&&(isAir(u)||u.type==='chief'))return false;
   if((command==='attack'||command==='refill')&&!u.capacity)return false;
   u.resume=null;u.repairing=false;u.perimeter=null;u.lineWatch=null;u.tankerRun=null;u.tankerOrbit=null;u.heliTarget=null;u.heliOrbit=null;
-  u.mode=command;u.tx=x;u.ty=y;
+  u.mode=command;u.tx=x;u.ty=y;if(u.type==='chief'){u.chiefPlanAt=0;u.chiefStatus=command==='defend'?'Driving to command post':'Driving to assigned location';}
   if(command==='refill')sendForWater(u,positionTile(x,y));
   return true;
 }
@@ -647,7 +647,7 @@ function positionTile(x,y){
 
 function terrainCost(tile,type){
   if(tile.road||tile.dozerCleared)return 2;
-  return (type==='dozer'?3:4)+(Math.abs((tile.elevation||0)-(at(tile.x-1,tile.y)?.elevation??tile.elevation??0))>5?1:0);
+  return (type==='dozer'?3:type==='chief'?5:4)+(Math.abs((tile.elevation||0)-(at(tile.x-1,tile.y)?.elevation??tile.elevation??0))>5?1:0);
 }
 
 function groundPassable(tile){
@@ -832,8 +832,38 @@ function helicopterAttackCourse(u,fire,dt){
   u.ty=cy+Math.sin(o.angle)*radius;
   return true;
 }
+function updateChief(u,dt,perks,hasFire){
+  if(u.mode==='defend'||u.mode==='move'){
+    if(dist(u.x,u.y,u.tx,u.ty)>8){moveUnit(u,perks.speed*dt);return;}
+    if(u.mode==='defend'){u.chiefStatus='Command post established';return;}
+    u.mode='auto';
+  }
+  if(!hasFire||u.health<40){const home=baseAssignment(u);Object.assign(u,home);u.chiefStatus='Returning to station';moveUnit(u,perks.speed*dt);return;}
+  u.mode='auto';
+  if(elapsed>=(u.chiefPlanAt||0)){
+    u.chiefPlanAt=elapsed+2;
+    const peers=units.filter(v=>v.health>0&&['engine','crew','dozer','tender'].includes(v.type)&&v.mode!=='retreat');
+    const fires=tiles.filter(t=>t.fire>.02);
+    let best=null,score=-Infinity;
+    for(const t of tiles){
+      if(!groundPassable(t)||(!t.road&&!t.cutLine))continue;
+      const x=t.x*C+C/2,y=t.y*C+C/2;
+      if(fires.some(f=>Math.abs(f.x-t.x)<=2&&Math.abs(f.y-t.y)<=2))continue;
+      const coverage=peers.filter(v=>dist(x,y,v.x,v.y)<150).length;
+      if(!coverage)continue;
+      const other=units.some(v=>v!==u&&v.type==='chief'&&v.health>0&&dist(x,y,v.x,v.y)<100);
+      const value=coverage*160-dist(u.x,u.y,x,y)*.25-(other?100:0)+(t.road?25:0);
+      if(value>score){best=t;score=value;}
+    }
+    if(best){u.tx=best.x*C+C/2;u.ty=best.y*C+C/2;}
+    else{u.tx=u.x;u.ty=u.y;}
+  }
+  u.chiefStatus=dist(u.x,u.y,u.tx,u.ty)>8?'Driving to command position':'Coordinating ground resources';
+  moveUnit(u,perks.speed*dt);
+}
 function updateSupportUnit(u,dt,perks,hasFire){
   if(!['chief','tender','airattack'].includes(u.type))return false;
+  if(u.type==='chief'){updateChief(u,dt,perks,hasFire);return true;}
   if(u.type==='tender'&&u.mode==='refill'){
     if(u.waitingForWater&&elapsed>=(u.waterRetry||0))sendForWater(u);
     moveUnit(u,perks.speed*dt);
@@ -914,7 +944,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   }
   u.cooldown-=dt;
   const perks=unitPerks(u);
-  if(units.some(v=>v.type==='chief'&&v.health>0&&dist(v.x,v.y,u.x,u.y)<160)&&!isAir(u)){perks.speed*=1.12;perks.power*=1.12;}
+  if(units.some(v=>v!==u&&v.type==='chief'&&v.health>0&&v.mode!=='retreat'&&v.mode!=='home'&&dist(v.x,v.y,u.x,u.y)<160)&&!isAir(u)&&u.type!=='chief'){perks.speed*=1.12;perks.power*=1.12;}
   if(u.type==='tanker'){updateAirportTanker(u,dt,perks,hasFire);return;}
   if(hasFire&&groundSafety(u,dt,perks))return;
   if(updateSupportUnit(u,dt,perks,hasFire))return;
@@ -1588,6 +1618,27 @@ function drawDozerSprite(u){
   ctx.fillStyle='#8a661d';ctx.fillRect(-12,-2,3,4);
   ctx.restore();
 }
+function drawChiefSprite(u){
+  ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);
+  ctx.fillStyle='#17212455';ctx.fillRect(-10,-5,23,12);
+  // Compact four-door command SUV; nose points along positive X.
+  ctx.fillStyle='#202729';for(const x of [-8,5])for(const y of [-7,4])ctx.fillRect(x,y,4,3);
+  ctx.beginPath();ctx.moveTo(-11,-5);ctx.lineTo(8,-5);ctx.quadraticCurveTo(11,-5,11,-3);ctx.lineTo(11,3);ctx.quadraticCurveTo(11,5,8,5);ctx.lineTo(-11,5);ctx.closePath();
+  ctx.fillStyle='#bc3028';ctx.fill();ctx.strokeStyle='#592725';ctx.lineWidth=.7;ctx.stroke();
+  ctx.fillStyle='#e9e8da';ctx.fillRect(-9,-4,12,8);
+  ctx.fillStyle='#385867';ctx.fillRect(3,-4,3,8);ctx.fillRect(-9,-3.5,2,7);
+  ctx.fillRect(-6,-4,7,1.5);ctx.fillRect(-6,2.5,7,1.5);
+  ctx.fillStyle='#d84937';ctx.fillRect(6,-4,4,8);
+  ctx.strokeStyle='#6a302b';ctx.lineWidth=.65;ctx.beginPath();ctx.moveTo(-2,-5);ctx.lineTo(-2,-3);ctx.moveTo(-2,3);ctx.lineTo(-2,5);ctx.stroke();
+  ctx.fillStyle='#e8dfbf';ctx.fillRect(10,-4,1.2,2);ctx.fillRect(10,2,1.2,2);
+  ctx.fillStyle='#792323';ctx.fillRect(-11,-4,1,2);ctx.fillRect(-11,2,1,2);
+  ctx.fillStyle='#2f3438';ctx.fillRect(1,-4,2,8);
+  const flash=Math.floor(renderPrev/160)%2===0;
+  ctx.fillStyle=flash?'#ff543d':'#88322e';ctx.fillRect(1,-4,2,3.5);
+  ctx.fillStyle=flash?'#88322e':'#ff543d';ctx.fillRect(1,.5,2,3.5);
+  ctx.fillStyle='#3a464b';ctx.font='bold 4px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('BC',-3,0);
+  ctx.restore();
+}
 function drawEngineSprite(u){
   ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25);
   ctx.fillStyle='#20292b';for(const x of [-8,4])for(const y of [-6,4])ctx.fillRect(x,y,4,2);
@@ -1711,7 +1762,7 @@ function draw(){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);ctx.save();
       }
     }else if(t.water){ctx.fillStyle='#356c86';ctx.fillRect(x,y,C,C);ctx.fillStyle='#70b1c780';ctx.fillRect(x+2,y+9,C-4,2)}else if(t.road){ctx.fillStyle='#666963';ctx.fillRect(x,y,C,C);ctx.fillStyle='#d2c99b';if(at(t.x-1,t.y)?.road||at(t.x+1,t.y)?.road)ctx.fillRect(x+8,y+11,9,2);if(at(t.x,t.y-1)?.road||at(t.x,t.y+1)?.road)ctx.fillRect(x+11,y+8,2,9)}else{ctx.fillStyle=t.burnt?'#272b26':t.break?'#795034':(t.tree?(t.x+t.y)%3===0?'#355632':'#3d613c':'#658157');ctx.fillRect(x,y,C,C);if(t.tree&&!t.burnt&&!t.break)drawForestTree(t,x,y);}if(t.retardant>0){ctx.fillStyle='rgba(230,80,112,.65)';ctx.fillRect(x,y,C,C)}if(t.wet>1){ctx.fillStyle='rgba(86,178,226,.22)';ctx.fillRect(x,y,C,C)}if(terrainOn&&!t.water){ctx.fillStyle='rgba(230,220,165,'+Math.max(0,Math.min(.22,(t.elevation-50)/900))+')';ctx.fillRect(x,y,C,C);}
 if(forecastOn&&t.fire<=.02&&!t.water&&!t.break&&t.fuel>0&&spreadNeighbors.some(([dx,dy])=>at(t.x-dx,t.y-dy)?.fire>.02&&windAlignment(dx,dy)>.3)){ctx.fillStyle='#ffb52d55';ctx.fillRect(x,y,C,C);}
-if(t.fire>.02)drawWildfire(t,x,y);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='airport'){drawAirport(b);continue}if(b.type==='station'){drawStation(b);continue}if(b.type==='water'){drawWaterTower(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'||u.type==='tanker'||u.type==='dozer'){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='tanker'||u.type==='scooper'||u.type==='airattack'){drawTankerSprite(u)}else if(u.type==='dozer'){drawDozerSprite(u)}else if(u.type==='engine'){drawEngineSprite(u)}else if(isRotor(u)){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'&&u.type!=='tanker'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}ctx.restore();const darkness=.20*(1-Math.cos((elapsed%240)/240*TWO))/2;ctx.fillStyle='rgba(8,15,40,'+darkness+')';ctx.fillRect(0,0,W,H);
+if(t.fire>.02)drawWildfire(t,x,y);}ctx.fillStyle='#83c1e599';ctx.font='bold 13px system-ui';if(reservoir)ctx.fillText('RESERVOIR',reservoir.x-38,reservoir.y+4);for(let h of homes){let x=h.x*C+12,y=h.y*C+12;ctx.fillStyle=h.burnt?'#362722':'#f3d7ac';ctx.fillRect(x-10,y-8,20,16);ctx.fillStyle=h.burnt?'#1e1817':'#a14e38';ctx.beginPath();ctx.moveTo(x-12,y-8);ctx.lineTo(x,y-17);ctx.lineTo(x+12,y-8);ctx.closePath();ctx.fill();if(!h.burnt){ctx.fillStyle='#2e3d41';ctx.fillRect(x-2,y,5,8)}if(h.hp<80&&!h.burnt){ctx.fillStyle='#392527';ctx.fillRect(x-11,y-23,22,3);ctx.fillStyle='#e9c34d';ctx.fillRect(x-11,y-23,22*h.hp/100,3)}}for(let b of buildings){if(b.type==='airport'){drawAirport(b);continue}if(b.type==='station'){drawStation(b);continue}if(b.type==='water'){drawWaterTower(b);continue}ctx.fillStyle='#16252bc9';ctx.fillRect(b.x-18,b.y-18,36,36);ctx.strokeStyle='#e9c783';ctx.lineWidth=2;ctx.strokeRect(b.x-18,b.y-18,36,36);ctx.font='24px system-ui';ctx.textAlign='center';ctx.fillText(BUILDINGS[b.type].icon,b.x,b.y+8);ctx.textAlign='start'}drawEngineStreams();for(let i=0;i<units.length;i++){let u=units[i];if(u.health<=0)continue;if(selectedGroup.has(i)){ctx.strokeStyle='#ffe799';ctx.lineWidth=2;if(u.type==='engine'||u.type==='helicopter'||u.type==='crew'||u.type==='tanker'||u.type==='dozer'||u.type==='chief'){ctx.save();ctx.translate(0,-helicopterHoverOffset(u));drawSelectionCorners(u);ctx.restore()}else{ctx.beginPath();ctx.arc(u.x,u.y,17,0,TWO);ctx.stroke();}ctx.strokeStyle='#ffe79980';ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(u.tx,u.ty);ctx.stroke()}if(u.type==='tanker'||u.type==='scooper'||u.type==='airattack'){drawTankerSprite(u)}else if(u.type==='dozer'){drawDozerSprite(u)}else if(u.type==='engine'){drawEngineSprite(u)}else if(u.type==='chief'){drawChiefSprite(u)}else if(isRotor(u)){drawHelicopterSprite(u)}else if(u.type==='crew'){drawCrewSprite(u)}else{if(u.type!=='crew'&&u.type!=='tanker'){ctx.fillStyle='#e6b353';ctx.beginPath();ctx.arc(u.x,u.y,12,0,TWO);ctx.fill();ctx.strokeStyle='#182d30';ctx.lineWidth=2;ctx.stroke();}ctx.font='16px system-ui';ctx.textAlign='center';ctx.fillText(types[u.type].icon,u.x,u.y+5);ctx.textAlign='start';}ctx.fillStyle='#060e14';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28,4);ctx.fillStyle='#7dd1ff';ctx.fillRect(u.x-14,u.y-21-helicopterHoverOffset(u),28*(u.capacity?u.water/u.capacity:0),4)}for(let p of particles){ctx.fillStyle=p.type==='water'?'rgba(107,198,245,'+Math.min(1,p.life*2)+')':'#ffba72';ctx.beginPath();ctx.arc(p.x,p.y,2+Math.abs(Math.sin(p.x+p.y))*2,0,TWO);ctx.fill()}drawWaterDropFlight();ctx.fillStyle='#0d1924aa';ctx.fillRect(8,8,175,31);ctx.fillStyle='#f1e9ca';ctx.font='bold 14px system-ui';ctx.fillText('WIND  '+windLabel(),18,29);if(buildingMode){ctx.fillStyle='#fff1d8';ctx.fillText('PLACE '+BUILDINGS[buildingMode].name.toUpperCase(),350,34)}else if(airDrop){ctx.fillStyle='#fff1d8';ctx.fillText('TAP DROP ZONE',420,34)}if(dragSelection&&dragSelection.dragging){const a=dragSelection.start,b=dragSelection.current;ctx.fillStyle='rgba(105,193,255,.14)';ctx.strokeStyle='#9ad7ff';ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}ctx.restore();const darkness=.20*(1-Math.cos((elapsed%240)/240*TWO))/2;ctx.fillStyle='rgba(8,15,40,'+darkness+')';ctx.fillRect(0,0,W,H);
 }function coords(e){
   const r=canvas.getBoundingClientRect();
   const scale=Math.min(r.width/W,r.height/H);
