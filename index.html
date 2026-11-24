@@ -921,7 +921,10 @@ function clearFirebreak(u,radius){
       if(!t.burnt)cleared++;
     }
   }
-  if(cleared)setXP(u,u.xp+cleared);
+  if(cleared){
+    setXP(u,u.xp+cleared);
+    if(u.type==='dozer')u.dustUntil=elapsed+.8;
+  }
 }
 
 function spreadFire(dt,heat){
@@ -1134,6 +1137,16 @@ function drawCrewSprite(u){
   ctx.restore();
 }
 function drawDozerSprite(u){
+  if(elapsed<(u.dustUntil??0)){
+    ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25);
+    const fade=Math.min(1,(u.dustUntil-elapsed)/.35);
+    for(let i=0;i<5;i++){
+      const phase=(elapsed*1.8+i*.2)%1;
+      ctx.fillStyle='rgba(194,164,119,'+(.46*(1-phase)*fade)+')';
+      ctx.beginPath();ctx.arc(10-phase*21,Math.sin(i*2.4)*7,2+phase*4,0,TWO);ctx.fill();
+    }
+    ctx.restore();
+  }
   ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading??0);ctx.scale(C/25,C/25);
   // D8-style tracked crawler, elevated cab, rear ripper and broad front blade.
   for(const y of [-8,4]){
