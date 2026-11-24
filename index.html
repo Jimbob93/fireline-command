@@ -256,6 +256,7 @@ function spawnIncident(incident=wave+1, awardBonus=true){
   generateMap();
   for(const u of units){
     u.perimeter=null;
+    u.commandTask=null;u.manualUntil=0;u.chiefRetreatUntil=0;u.commandScanAt=0;u.chiefReport=null;
     u.route=null;
     u.waterStream=null;
     u.tankerRun=null;u.tankerOrbit=null;
@@ -430,13 +431,14 @@ $('setXP').disabled=!cheatsAvailable||!lead;
 $('xpValue').disabled=!cheatsAvailable||!lead;
 if(lead){
   const level=rank(lead),next=training[level+1];
-  const upgrades=['+20% speed',lead.type==='dozer'?'single-tile firebreak':lead.type==='tanker'?'faster retardant reload':'+25% water capacity',lead.type==='dozer'?'single-tile firebreak':'+35% suppression power'];
+  const upgrades=lead.type==='chief'?['190px command radius · +15% coordination','225px command radius · +20% coordination','260px command radius · +25% coordination']:['+20% speed',lead.type==='dozer'?'single-tile firebreak':lead.type==='tanker'?'faster retardant reload':'+25% water capacity',lead.type==='dozer'?'single-tile firebreak':'+35% suppression power'];
   $('xpStatus').textContent=lead.name+' · '+(next?(next.xp-lead.xp)+' XP to '+next.label+' ('+upgrades[level]+')':'All upgrades unlocked');
   if(lead.homeBase){
     const base=lead.homeBase;
     const number=buildings.filter(b=>b.type===base.type).indexOf(base)+1;
     $('xpStatus').textContent+=' · Home: '+BUILDINGS[base.type].name+' '+number;
   }
+  if(lead.type==='chief'){const p=chiefCommandStats(lead),q=lead.chiefReport;$('xpStatus').textContent+=' · Radius '+(p.radius/C).toFixed(1)+' tiles · +'+Math.round(p.bonus*100)+'% coordination'+(q?' · '+q.resources+' resources · '+q.threatened+' homes at risk · '+q.low+' low water · '+q.endangered+' endangered · '+q.assignments+' assignments':'');}
   $('xpValue').placeholder=String(lead.xp);
 }
 $('cheatSpread').classList.toggle('selected',freezeSpread);
@@ -450,7 +452,8 @@ if(!b){b=document.createElement('button');b.type='button';b.dataset.unit=i;b.onc
 b.className='unit'+(selectedGroup.has(i)?' active':'');b.disabled=u.health<=0;b.setAttribute('aria-pressed',selectedGroup.has(i));
 const status=u.health<=0?'Destroyed':u.type==='tender'&&u.mode!=='retreat'?(u.tenderStatus||'Ready for dispatch'):u.type==='chief'&&u.mode!=='retreat'?(u.chiefStatus||'Ready for dispatch'):u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.detourUntil>elapsed?'Cutting around fire':u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
 const value=u.type==='tanker'?'Retardant '+Math.round(100*u.water/u.capacity)+'%':u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
-const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
+const task=chiefAssignment(u);
+const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${task&&u.mode==='auto'?task.kind:status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
 if(b.innerHTML!==html)b.innerHTML=html;
 }
 while($('units').children.length>units.length)$('units').lastElementChild.remove();
@@ -485,7 +488,7 @@ function issueUnitOrder(u,x,y,command){
   if(command==='break'&&(isAir(u)||u.type==='chief'||u.type==='tender'))return false;
   if((command==='attack'||command==='refill')&&!u.capacity)return false;
   u.resume=null;u.repairing=false;u.perimeter=null;u.lineWatch=null;u.tankerRun=null;u.tankerOrbit=null;u.heliTarget=null;u.heliOrbit=null;
-  u.mode=command;u.tx=x;u.ty=y;if(u.type==='chief'){u.chiefPlanAt=0;u.chiefStatus=command==='defend'?'Driving to command post':'Driving to assigned location';}
+  u.commandTask=null;u.manualUntil=elapsed+25;u.mode=command;u.tx=x;u.ty=y;if(u.type==='chief'){u.chiefPlanAt=0;u.chiefStatus=command==='defend'?'Driving to command post':'Driving to assigned location';}
   if(command==='refill')sendForWater(u,positionTile(x,y));
   return true;
 }
@@ -619,7 +622,9 @@ function planPerimeter(u){
   let plan=perimeterPlans.filter(p=>active(p)&&unfinished(p)&&available(p))
     .sort((a,b)=>dist(u.x,u.y,available(a).start.tx,available(a).start.ty)-dist(u.x,u.y,available(b).start.tx,available(b).start.ty))[0];
   if(!plan){
-    const first=nearestFire(u,Infinity,t=>!t.contained&&!perimeterPlans.some(p=>unfinished(p)&&t.x>=p.bounds[0]&&t.x<=p.bounds[1]&&t.y>=p.bounds[2]&&t.y<=p.bounds[3]),true);
+    const eligible=t=>!t.contained&&!perimeterPlans.some(p=>unfinished(p)&&t.x>=p.bounds[0]&&t.x<=p.bounds[1]&&t.y>=p.bounds[2]&&t.y<=p.bounds[3]);
+    const task=chiefAssignment(u),target=task&&at(task.x,task.y);
+    const first=target?.fire>.02&&eligible(target)?target:nearestFire(u,Infinity,eligible,true);
     if(!first)return;
     const cluster=[first],seen=new Set(cluster);
     let left=first.x,right=first.x,top=first.y,bottom=first.y;
@@ -905,10 +910,78 @@ function helicopterAttackCourse(u,fire,dt){
   u.ty=cy+Math.sin(o.angle)*radius;
   return true;
 }
+function chiefCommandStats(u){
+  const level=rank(u);
+  return {radius:[160,190,225,260][level],bonus:[.12,.15,.20,.25][level]};
+}
+function chiefActive(u){
+  return u.type==='chief'&&u.health>0&&!['home','retreat','standby'].includes(u.mode);
+}
+function chiefAssignment(v){
+  const a=v.commandTask,c=units[a?.chief];
+  return a&&a.wave===wave&&a.until>elapsed&&c&&chiefActive(c)&&dist(c.x,c.y,v.x,v.y)<=chiefCommandStats(c).radius&&!(v.manualUntil>elapsed)?a:null;
+}
+function chiefForecast(t){
+  let growth=0;
+  for(const [dx,dy] of spreadNeighbors){
+    const n=at(t.x+dx,t.y+dy);
+    if(n&&!n.water&&!n.break&&!n.road&&n.fuel>0&&n.fire<=.02)
+      growth+=Math.max(0,windAlignment(dx,dy)+.25)*fireBehavior(n).spread*(1+windMph/35)*Math.max(.6,1+((n.elevation||0)-(t.elevation||0))*.025)*(n.retardant>0?.15:1)*(n.wet>0?.15:1);
+  }
+  return growth;
+}
+function chiefRisk(v){
+  const t=positionTile(v.x,v.y);if(!t)return 0;
+  let risk=0;
+  for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++){
+    const f=at(t.x+x,t.y+y);
+    if(f?.fire>.02)risk+=f.fire/(1+Math.hypot(x,y))*(x||y?1+Math.max(0,windAlignment(-x,-y))*windMph/60:2);
+  }
+  return risk;
+}
+function coordinateChief(u){
+  if(elapsed<(u.commandScanAt||0))return;
+  u.commandScanAt=elapsed+2;
+  const {radius}=chiefCommandStats(u),index=units.indexOf(u);
+  const nearby=units.filter(v=>v.health>0&&['engine','crew','dozer','tender'].includes(v.type)&&dist(u.x,u.y,v.x,v.y)<=radius);
+  const fires=tiles.filter(t=>t.fire>.02&&dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2)<=radius+220)
+    .map(t=>({t,risk:structureRisk.get(t)||0,growth:chiefForecast(t)}));
+  const threatened=homes.filter(h=>!h.burnt&&fires.some(({t})=>Math.hypot(h.x-t.x,h.y-t.y)<=5+Math.max(0,windAlignment(h.x-t.x||.001,h.y-t.y))*Math.min(4,windMph/15)));
+  const endangered=nearby.filter(v=>chiefRisk(v)>1.4||v.health<40);
+  const low=nearby.filter(v=>['engine','crew'].includes(v.type)&&v.water<v.capacity*.35&&v.mode!=='retreat');
+  const assigned=new Set();
+  let assignments=0;
+  const give=(v,task)=>{v.commandTask={...task,chief:index,wave,until:elapsed+5};assignments++;};
+  const eligible=v=>!(v.manualUntil>elapsed)&&(!chiefAssignment(v)||v.commandTask.chief===index);
+  for(const v of endangered){
+    if(v.mode==='retreat'||chiefRisk(v)<1.0)continue;
+    v.chiefRetreatUntil=elapsed+3;
+  }
+  for(const v of nearby){
+    if(!eligible(v)||endangered.includes(v)||!['engine','crew'].includes(v.type)||v.mode!=='auto'||v.water<=0)continue;
+    const candidates=fires.filter(({t})=>!assigned.has(t)&&dist(v.x,v.y,t.x*C+C/2,t.y*C+C/2)<420);
+    const score=({t,risk,growth})=>risk*(v.type==='engine'?2:.7)+growth*22+t.fire*35+(v.type==='crew'&&t.contained?180:0)-dist(v.x,v.y,t.x*C+C/2,t.y*C+C/2)*.65;
+    candidates.sort((a,b)=>score(b)-score(a));
+    const best=candidates[0];if(!best)continue;
+    assigned.add(best.t);give(v,{kind:best.risk>80?'Protect homes':best.t.contained?'Mop up':'Attack priority fire',x:best.t.x,y:best.t.y});
+  }
+  const reserved=new Set();
+  for(const v of nearby.filter(v=>v.type==='tender'&&eligible(v)&&v.mode==='auto'&&v.water>0)){
+    const target=low.filter(w=>!reserved.has(w)).sort((a,b)=>a.water/a.capacity-b.water/b.capacity||dist(v.x,v.y,a.x,a.y)-dist(v.x,v.y,b.x,b.y))[0];
+    if(target){reserved.add(target);give(v,{kind:'Supply low-water unit',unit:units.indexOf(target)});}
+  }
+  // Direct idle dozers to priority incidents; their existing planner handles line construction.
+  for(const v of nearby.filter(v=>v.type==='dozer'&&eligible(v)&&v.mode==='move'&&dist(v.x,v.y,v.tx,v.ty)<=8)){
+    const best=fires.filter(f=>!f.t.contained).sort((a,b)=>b.risk+b.growth*25-a.risk-a.growth*25)[0];
+    if(best)give(v,{kind:'Priority containment',x:best.t.x,y:best.t.y});
+  }
+  u.chiefReport={resources:nearby.length,threatened:threatened.length,endangered:endangered.length,low:low.length,assignments,priority:fires.length?Math.round(Math.max(...fires.map(f=>f.risk+f.growth*25))):0};
+  if(assignments>0&&elapsed>=(u.commandXPAt||0)){u.commandXPAt=elapsed+5;setXP(u,u.xp+1);}
+}
 function updateChief(u,dt,perks,hasFire){
   if(u.mode==='defend'||u.mode==='move'){
     if(dist(u.x,u.y,u.tx,u.ty)>8){moveUnit(u,perks.speed*dt);return;}
-    if(u.mode==='defend'){u.chiefStatus='Command post established';return;}
+    if(u.mode==='defend'&&hasFire&&u.health>=40){coordinateChief(u);u.chiefStatus='Command post established';return;}
     u.mode='auto';
   }
   if(!hasFire||u.health<40){const home=baseAssignment(u);Object.assign(u,home);u.chiefStatus='Returning to station';moveUnit(u,perks.speed*dt);return;}
@@ -922,7 +995,7 @@ function updateChief(u,dt,perks,hasFire){
       if(!groundPassable(t)||(!t.road&&!t.cutLine))continue;
       const x=t.x*C+C/2,y=t.y*C+C/2;
       if(fires.some(f=>Math.abs(f.x-t.x)<=2&&Math.abs(f.y-t.y)<=2))continue;
-      const coverage=peers.filter(v=>dist(x,y,v.x,v.y)<150).length;
+      const coverage=peers.filter(v=>dist(x,y,v.x,v.y)<chiefCommandStats(u).radius-10).length;
       if(!coverage)continue;
       const other=units.some(v=>v!==u&&v.type==='chief'&&v.health>0&&dist(x,y,v.x,v.y)<100);
       const value=coverage*160-dist(u.x,u.y,x,y)*.25-(other?100:0)+(t.road?25:0);
@@ -931,6 +1004,7 @@ function updateChief(u,dt,perks,hasFire){
     if(best){u.tx=best.x*C+C/2;u.ty=best.y*C+C/2;}
     else{u.tx=u.x;u.ty=u.y;}
   }
+  coordinateChief(u);
   u.chiefStatus=dist(u.x,u.y,u.tx,u.ty)>8?'Driving to command position':'Coordinating ground resources';
   moveUnit(u,perks.speed*dt);
 }
@@ -951,7 +1025,8 @@ function updateTender(u,dt,perks,hasFire){
   if(u.mode!=='defend')u.mode='auto';
   const peers=units.filter(v=>v.health>0&&['engine','crew'].includes(v.type)&&v.water<v.capacity&&v.mode!=='retreat');
   peers.sort((a,b)=>(a.water/a.capacity-b.water/b.capacity)*300+dist(u.x,u.y,a.x,a.y)-dist(u.x,u.y,b.x,b.y));
-  const target=peers[0];
+  const task=chiefAssignment(u),assigned=task?.kind==='Supply low-water unit'?units[task.unit]:null;
+  const target=peers.includes(assigned)?assigned:peers[0];
   if(target&&u.mode!=='defend'&&dist(u.x,u.y,target.x,target.y)>55){u.tx=target.x;u.ty=target.y;moveUnit(u,perks.speed*dt);}
   let budget=dt*24,delivered=0;
   for(const v of peers){
@@ -983,7 +1058,7 @@ function groundSafety(u,dt,perks){
   const danger=t=>{let risk=0;for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++){
     const f=at(t.x+x,t.y+y);if(f?.fire>.02)risk+=f.fire/(1+Math.hypot(x,y));
   }return risk;};
-  if(u.mode!=='retreat'&&cell.fire<=.02&&(u.health>45||danger(cell)<.6)&&danger(cell)<2.4)return false;
+  if(u.mode!=='retreat'&&!(u.chiefRetreatUntil>elapsed)&&cell.fire<=.02&&(u.health>45||danger(cell)<.6)&&danger(cell)<2.4)return false;
   if(u.mode!=='retreat'){
     if(u.perimeter){u.perimeter.retryAt=elapsed+3;}
     u.perimeter=null;u.lineWatch=null;u.route=null;u.routeGoal=null;
@@ -1016,6 +1091,7 @@ function groundPriority(u,t){
   return -d+(u.type==='engine'?risk*1.5:u.type==='crew'?(t.contained?180:0)+risk*.35:0);
 }
 function groundMission(u,range){
+  const task=chiefAssignment(u),target=task&&at(task.x,task.y);if(target?.fire>.02)return target;
   let best=null,score=-Infinity;
   for(const t of tiles){if(t.fire<=.02||dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2)>=range)continue;
     const value=groundPriority(u,t);if(value>score){best=t;score=value;}
@@ -1036,7 +1112,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   }
   u.cooldown-=dt;
   const perks=unitPerks(u);
-  if(units.some(v=>v!==u&&v.type==='chief'&&v.health>0&&v.mode!=='retreat'&&v.mode!=='home'&&dist(v.x,v.y,u.x,u.y)<160)&&!isAir(u)&&u.type!=='chief'){perks.speed*=1.12;perks.power*=1.12;}
+  if(!isAir(u)&&u.type!=='chief'){let bonus=0;for(const v of units)if(chiefActive(v)&&dist(v.x,v.y,u.x,u.y)<chiefCommandStats(v).radius)bonus=Math.max(bonus,chiefCommandStats(v).bonus);perks.speed*=1+bonus;perks.power*=1+bonus;}
   if(u.type==='tanker'){updateAirportTanker(u,dt,perks,hasFire);return;}
   if(hasFire&&groundSafety(u,dt,perks))return;
   if(updateSupportUnit(u,dt,perks,hasFire))return;
