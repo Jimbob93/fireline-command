@@ -960,25 +960,56 @@ function updateAirportTanker(u,dt,perks,hasFire){
   const ahead=dist(u.x,u.y,o.cx,o.cy)>radius+18?0:.32;
   travel(o.cx+Math.cos(angle+ahead)*radius,o.cy+Math.sin(angle+ahead)*radius,perks.speed);
 }
+function tankerFootprint(run){
+  const width=35,length=dist(run.start.x,run.start.y,run.end.x,run.end.y);
+  if(length<.001)return [];
+  const dx=(run.end.x-run.start.x)/length,dy=(run.end.y-run.start.y)/length;
+  const result=[];
+  for(let y=Math.max(0,Math.floor((Math.min(run.start.y,run.end.y)-width)/C));y<=Math.min(ROWS-1,Math.floor((Math.max(run.start.y,run.end.y)+width)/C));y++){
+    for(let x=Math.max(0,Math.floor((Math.min(run.start.x,run.end.x)-width)/C));x<=Math.min(COLS-1,Math.floor((Math.max(run.start.x,run.end.x)+width)/C));x++){
+      const tile=at(x,y),ox=x*C+C/2-run.start.x,oy=y*C+C/2-run.start.y;
+      const along=ox*dx+oy*dy;
+      if(tile&&!tile.water&&along>=0&&along<=length+.001&&Math.abs(ox*dy-oy*dx)<=width)result.push(tile);
+    }
+  }
+  return result;
+}
 function flyTankerRun(u,dt,perks,hasFire){
   let run=u.tankerRun;
   if(!run){
     if(u.water<1||u.cooldown>0||!(u.mode==='attack'||u.mode==='auto'&&hasFire))return false;
-    const fire=u.mode==='auto'?nearestFire(u,Infinity,undefined,true):null;
-    if(u.mode==='auto'&&!fire)return false;
-    const x=fire?fire.x*C+C/2:Math.max(C/2,Math.min(W-C/2,u.tx));
-    const y=fire?fire.y*C+C/2:Math.max(C/2,Math.min(H-C/2,u.ty));
     const [,,windX,windY]=windDirections[windDirection];
     const dx=windY,dy=-windX;
     const edgeDistance=(position,direction,limit)=>direction===0?Infinity:
       ((direction>0?limit-1:1)-position)/direction;
-    const endpoint=(direction)=>{
-      const length=Math.min(130,edgeDistance(x,dx*direction,W),edgeDistance(y,dy*direction,H));
-      return {x:x+dx*direction*length,y:y+dy*direction*length};
+    const makeRun=(x,y)=>{
+      const endpoint=direction=>{
+        const length=Math.min(130,edgeDistance(x,dx*direction,W),edgeDistance(y,dy*direction,H));
+        return {x:x+dx*direction*length,y:y+dy*direction*length};
+      };
+      const ends=[endpoint(-1),endpoint(1)];
+      if(dist(u.x,u.y,ends[1].x,ends[1].y)<dist(u.x,u.y,ends[0].x,ends[0].y))ends.reverse();
+      return {start:ends[0],end:ends[1],dropping:false,covered:new Set()};
     };
-    const ends=[endpoint(-1),endpoint(1)];
-    if(dist(u.x,u.y,ends[1].x,ends[1].y)<dist(u.x,u.y,ends[0].x,ends[0].y))ends.reverse();
-    run=u.tankerRun={start:ends[0],end:ends[1],dropping:false,covered:new Set()};
+    // Reserve the entire planned drop footprint, including runs still inbound.
+    const reserved=new Set();
+    for(const other of units){
+      if(other!==u&&other.health>0&&other.type==='tanker'&&other.tankerRun){
+        for(const tile of tankerFootprint(other.tankerRun))reserved.add(tile);
+      }
+    }
+    const candidates=tiles.filter(t=>t.fire>.02&&!t.water&&t.retardant<=0&&!reserved.has(t));
+    const manual=u.mode==='attack';
+    const originX=manual?u.tx:u.x,originY=manual?u.ty:u.y;
+    candidates.sort((a,b)=>dist(originX,originY,a.x*C+C/2,a.y*C+C/2)-dist(originX,originY,b.x*C+C/2,b.y*C+C/2)-(manual?0:(structureRisk.get(a)||0)-(structureRisk.get(b)||0)));
+    const choices=manual?[makeRun(Math.max(C/2,Math.min(W-C/2,u.tx)),Math.max(C/2,Math.min(H-C/2,u.ty))),...candidates.map(t=>makeRun(t.x*C+C/2,t.y*C+C/2))]:candidates.map(t=>makeRun(t.x*C+C/2,t.y*C+C/2));
+    for(const candidate of choices){
+      const footprint=tankerFootprint(candidate);
+      if(!footprint.length||footprint.some(t=>reserved.has(t)))continue;
+      if(!footprint.some(t=>t.retardant<=0&&(manual||t.fire>.02)))continue;
+      run=u.tankerRun=candidate;break;
+    }
+    if(!run)return false;
   }
   const target=run.dropping?run.end:run.start;
   u.tx=target.x;
@@ -1017,7 +1048,7 @@ function paintRetardant(u,run,x,y,power){
       const tile=at(col,row);
       const offsetX=col*C+C/2-run.start.x,offsetY=row*C+C/2-run.start.y;
       const along=offsetX*dx+offsetY*dy;
-      if(tile.water||run.covered.has(tile)||along<0||along>progress+.001||
+      if(tile.water||run.covered.has(tile)||tile.retardant>0||along<0||along>progress+.001||
          Math.abs(offsetX*dy-offsetY*dx)>width)continue;
       run.covered.add(tile);
       tile.retardant=30;
