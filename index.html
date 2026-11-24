@@ -98,7 +98,7 @@ function unitPerks(u,level=rank(u)){
     speed:type.speed*(level>=1?1.20:1),
     capacity:type.capacity*(level>=2&&u.type!=='tanker'?1.25:1),
     power:type.power*(level>=3?1.35:1),
-    cutRadius:({dozer:29,crew:39,engine:25}[u.type]||0)+(u.type==='dozer'?(level>=2?10:0)+(level>=3?8:0):level>=3&&!isAir(u)?8:0)
+    cutRadius:({dozer:0,crew:39,engine:25}[u.type]||0)+(level>=3&&!isAir(u)&&u.type!=='dozer'?8:0)
   };
 }
 function isAir(u){
@@ -377,7 +377,7 @@ $('setXP').disabled=!cheatsAvailable||!lead;
 $('xpValue').disabled=!cheatsAvailable||!lead;
 if(lead){
   const level=rank(lead),next=training[level+1];
-  const upgrades=['+20% speed',lead.type==='dozer'?'wider firebreak':lead.type==='tanker'?'faster retardant reload':'+25% water capacity',lead.type==='dozer'?'wider firebreak':'+35% suppression power'];
+  const upgrades=['+20% speed',lead.type==='dozer'?'single-tile firebreak':lead.type==='tanker'?'faster retardant reload':'+25% water capacity',lead.type==='dozer'?'single-tile firebreak':'+35% suppression power'];
   $('xpStatus').textContent=lead.name+' · '+(next?(next.xp-lead.xp)+' XP to '+next.label+' ('+upgrades[level]+')':'All upgrades unlocked');
   if(lead.homeBase){
     const base=lead.homeBase;
@@ -906,11 +906,12 @@ function paintRetardant(u,run,x,y,power){
 
 function clearFirebreak(u,radius){
   let cleared=0;
+  if(u.type==='dozer')radius=0;
   for(let y=Math.floor((u.y-radius)/C);y<=Math.floor((u.y+radius)/C);y++){
     for(let x=Math.floor((u.x-radius)/C);x<=Math.floor((u.x+radius)/C);x++){
       const t=at(x,y);
       if(!t||t.fire>.02||t.water||t.road||t.break||
-         dist(x*C+C/2,y*C+C/2,u.x,u.y)>radius||
+         (u.type!=='dozer'&&dist(x*C+C/2,y*C+C/2,u.x,u.y)>radius)||
          homes.some(h=>h.x===x&&h.y===y))continue;
       t.break=true;
       t.cutLine=true;
