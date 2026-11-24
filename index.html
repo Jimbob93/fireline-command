@@ -446,7 +446,7 @@ refreshAirDropButton();document.querySelectorAll('[data-build]').forEach(b=>{b.d
 function issueUnitOrder(u,x,y,command){
   if(command==='break'&&isAir(u))return false;
   if((command==='attack'||command==='refill')&&!u.capacity)return false;
-  u.resume=null;u.repairing=false;u.perimeter=null;u.lineWatch=null;u.tankerRun=null;u.tankerOrbit=null;
+  u.resume=null;u.repairing=false;u.perimeter=null;u.lineWatch=null;u.tankerRun=null;u.tankerOrbit=null;u.heliTarget=null;u.heliOrbit=null;
   u.mode=command;u.tx=x;u.ty=y;
   if(command==='refill')sendForWater(u,positionTile(x,y));
   return true;
@@ -791,6 +791,24 @@ function chooseHelicopterTarget(u,range){
   if(best||range>types.helicopter.range)u.heliTarget=best;
   return best;
 }
+// A helicopter approaches a fire, then flies a continuous close orbit while dropping water.
+function helicopterAttackCourse(u,fire,dt){
+  if(!fire){u.heliOrbit=null;return false;}
+  const x=fire.x*C+C/2,y=fire.y*C+C/2;
+  const radius=types.helicopter.range*.68;
+  const cx=Math.max(radius+2,Math.min(W-radius-2,x)),cy=Math.max(radius+2,Math.min(H-radius-2,y));
+  let o=u.heliOrbit;
+  if(!o||o.fire!==fire){
+    o=u.heliOrbit={fire,angle:Math.atan2(u.y-cy,u.x-cx),direction:units.indexOf(u)%2?-1:1};
+  }
+  // Advance the waypoint from the actual aircraft position, not from a fixed hover point.
+  const d=dist(u.x,u.y,cx,cy);
+  const angle=d>1?Math.atan2(u.y-cy,u.x-cx):o.angle;
+  o.angle=angle+o.direction*(d>radius+20?.12:.85);
+  u.tx=cx+Math.cos(o.angle)*radius;
+  u.ty=cy+Math.sin(o.angle)*radius;
+  return true;
+}
 function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   if(u.health<=0)return;
 
@@ -836,12 +854,21 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   }
 
   const range=types[u.type].range;
-  if(u.type==='helicopter'&&u.mode!=='auto')u.heliTarget=null;
+  if(u.type==='helicopter'&&u.mode!=='auto'){u.heliTarget=null;u.heliOrbit=null;}
   if(u.mode==='auto'){
-    const fire=u.type==='helicopter'?chooseHelicopterTarget(u,420):nearestFire(u,420,undefined,true);
-    const chase=fire&&dist(u.x,u.y,fire.x*C+12,fire.y*C+12)>range*.8;
-    u.tx=chase?fire.x*C+12:u.x;
-    u.ty=chase?fire.y*C+12:u.y;
+    if(u.type==='helicopter'){
+      // Keep an assigned fire until it is extinguished, out of reach, or claimed by a tanker.
+      const prior=u.heliTarget;
+      const taken=prior&&units.some(v=>v!==u&&v.health>0&&(v.type==='tanker'&&v.tankerRun?.footprint?.includes(prior)||v.type==='helicopter'&&v.mode==='auto'&&v.water>0&&v.heliTarget===prior));
+      const fire=prior?.fire>.02&&!taken&&dist(u.x,u.y,prior.x*C+C/2,prior.y*C+C/2)<420?prior:chooseHelicopterTarget(u,420);
+      u.heliTarget=fire;
+      if(!helicopterAttackCourse(u,fire,dt)){u.tx=u.x;u.ty=u.y;}
+    }else{
+      const fire=nearestFire(u,420,undefined,true);
+      const chase=fire&&dist(u.x,u.y,fire.x*C+12,fire.y*C+12)>range*.8;
+      u.tx=chase?fire.x*C+12:u.x;
+      u.ty=chase?fire.y*C+12:u.y;
+    }
   }
   const cell=positionTile(u.x,u.y);
   if(!isAir(u)&&cell?.fire>.02){
@@ -857,7 +884,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
       !u.route?.length&&positionTile(u.x,u.y)!==positionTile(u.tx,u.ty))){
     sendForWater(u);
   }
-  moveUnit(u,perks.speed*dt);
+  moveUnit(u,perks.speed*dt*(u.type==='helicopter'&&u.mode==='auto'&&u.heliOrbit&&dist(u.x,u.y,u.heliOrbit.fire.x*C+C/2,u.heliOrbit.fire.y*C+C/2)<range? .65:1));
   const arrived=dist(u.x,u.y,u.tx,u.ty)<=8;
   if(!arrived&&rerouteStalledDozer(u,dt))return;
   if(u.mode==='refill'&&arrived&&!u.waitingForWater&&(isAir(u)||groundPassable(positionTile(u.tx,u.ty)))){
@@ -902,7 +929,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
     u.water=Math.min(u.capacity,u.water+dt*12);
   }
   if(u.type!=='tanker'&&u.mode!=='break'&&u.mode!=='refill'&&!(u.homeBase&&u.mode==='home')&&u.water>0&&u.cooldown<=0){
-    const fire=u.type==='helicopter'&&u.mode==='auto'?chooseHelicopterTarget(u,range):nearestFire(u,range,undefined,u.mode==='auto'||u.mode==='defend');
+    const fire=u.type==='helicopter'&&u.mode==='auto'?(u.heliTarget?.fire>.02&&dist(u.x,u.y,u.heliTarget.x*C+12,u.heliTarget.y*C+12)<=range?u.heliTarget:null):nearestFire(u,range,undefined,u.mode==='auto'||u.mode==='defend');
     if(fire){
       const x=fire.x*C+12,y=fire.y*C+12;
       u.cooldown=types[u.type].delay;
