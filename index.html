@@ -553,6 +553,7 @@ function sendForWater(u,requested){
 }
 
 function baseAssignment(u){
+  if(u.homeBase?.type==='airport'&&isAir(u))return {mode:'home',tx:u.homeBase.x+(u.type==='helicopter'?(u.helipad??0)*C:0),ty:u.homeBase.y+(u.type==='helicopter'?C:0),repairing:u.health<100};
   const station=u.health<100&&(u.homeBase?.type==='station'?u.homeBase:buildings.find(b=>b.type==='station'));
   const base=station||u.homeBase||recruitmentBase()||{x:19*C+C/2,y:20*C+C/2};
   return {mode:'home',tx:base.x,ty:base.y,repairing:Boolean(station)};
@@ -731,13 +732,13 @@ function rerouteStalledDozer(u,dt){
 function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   if(u.health<=0)return;
 
-  const atStation=buildings.some(b=>b.type==='station'&&dist(u.x,u.y,b.x,b.y)<=16);
+  const atStation=buildings.some(b=>b.type==='station'&&dist(u.x,u.y,b.x,b.y)<=16)||(u.type==='helicopter'&&u.homeBase?.type==='airport'&&dist(u.x,u.y,u.homeBase.x+(u.helipad??0)*C,u.homeBase.y+C)<=16);
   if(atStation){
     u.health=Math.min(100,u.health+dt*22);
     if(u.health>=100&&u.repairing){
       u.repairing=false;
       if(u.homeBase&&(u.mode==='home'||u.mode==='standby')){
-        Object.assign(u,{mode:'home',tx:u.homeBase.x,ty:u.homeBase.y});
+        Object.assign(u,baseAssignment(u));
       }
     }
   }
@@ -1438,7 +1439,7 @@ const x=Math.floor(base.x/C),y=Math.floor(base.y/C);
 const unit=createUnit(spec.label+' '+(units.filter(u=>u.type===type).length+1),type,x,y);
 unit.homeBase=base;
 if(type==='tanker'){unit.airportStage='parked';unit.heading=0;}
-if(type==='helicopter'){unit.y=base.y+C;unit.ty=unit.y;}
+if(type==='helicopter'){const occupied=new Set(units.filter(u=>u.health>0&&u.type==='helicopter'&&u.homeBase===base).map(u=>u.helipad));unit.helipad=[-2,0,2].find(p=>!occupied.has(p))??0;unit.x=base.x+unit.helipad*C;unit.tx=unit.x;unit.y=base.y+C;unit.ty=unit.y;}
 funds-=cost;
 unitPurchases[type]=(unitPurchases[type]||0)+1;
 units.push(unit);
