@@ -1095,19 +1095,19 @@ function drawEngineStreams(){
 }
 
 function drawStation(b){
-  ctx.save();ctx.translate(b.x,b.y);
-  ctx.fillStyle='#30383a';ctx.fillRect(-24,-19,48,42);
-  ctx.fillStyle='#b5a18a';ctx.fillRect(-21,-15,42,33);
-  ctx.fillStyle='#8e3028';ctx.fillRect(-24,-23,48,15);
-  ctx.fillStyle='#c34c3b';ctx.fillRect(-22,-22,44,5);
-  ctx.fillStyle='#f8e8ce';ctx.font='bold 7px system-ui';ctx.textAlign='center';ctx.fillText('FIRE STATION',0,-12);
-  for(const x of [-18,2]){
-    ctx.fillStyle='#502b28';ctx.fillRect(x,-6,16,24);
-    ctx.fillStyle='#c7d0d0';ctx.fillRect(x+2,-4,12,20);
-    ctx.fillStyle='#52656a';for(let y=0;y<16;y+=4)ctx.fillRect(x+2,y,12,1);
-    ctx.fillStyle='#8ec5dc';ctx.fillRect(x+3,-3,10,4);
+  ctx.save();ctx.translate(b.x,b.y);ctx.scale(C/25,C/25);
+  ctx.fillStyle='#373b3a';ctx.fillRect(-12,-11,24,23);
+  ctx.fillStyle='#e3cbb0';ctx.fillRect(-11,-4,22,14);
+  ctx.fillStyle='#96332b';ctx.beginPath();ctx.moveTo(-12,-4);ctx.lineTo(0,-12);ctx.lineTo(12,-4);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#e66b50';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-10,-5);ctx.lineTo(0,-11);ctx.lineTo(10,-5);ctx.stroke();
+  ctx.fillStyle='#f5e8d5';ctx.font='bold 4px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('FIRE',0,-5.5);
+  for(const x of [-10,1]){
+    ctx.fillStyle='#5b2c28';ctx.fillRect(x,-2,9,12);
+    ctx.fillStyle='#c8d0ce';ctx.fillRect(x+1,-1,7,10);
+    ctx.fillStyle='#47616b';ctx.fillRect(x+1,0,7,3);
+    ctx.fillStyle='#82908f';for(let y=4;y<9;y+=2)ctx.fillRect(x+1,y,7,1);
   }
-  ctx.fillStyle='#a7a8a1';ctx.fillRect(-22,18,44,5);
+  ctx.fillStyle='#a6a7a1';ctx.fillRect(-11,10,22,2);
   ctx.restore();
 }
 function drawEngineSprite(u){
