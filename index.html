@@ -1040,17 +1040,10 @@ function drawWaterDropFlight(){
 
 function update(dt){const heat=difficulty();elapsed+=dt;funds+=dt*income();waveTimer+=dt;updateWind();updateWaterDrop(dt);if(containmentDirty)checkContainment();for(let t of tiles){if(t.wet>0)t.wet=Math.max(0,t.wet-dt);if(t.retardant>0)t.retardant=Math.max(0,t.retardant-dt);if(t.fire>.02){
   const rate=t.wet>0?.07:.12;
-  t.fuel-=dt*rate*(.8+t.fire);
-  if(t.contained&&t.fuel<=0){
-    t.fuel=0;
-    t.fire=0;
-    t.burnt=true;
-  }else{
-    // Keep exposed fires active even after their original fuel has been spent.
-    if(!t.contained)t.fuel=Math.max(.03,t.fuel);
-    const fire=fireBehavior(t);
-    t.fire=Math.min(fire.peak,t.fire+dt*fire.growth);
-  }
+  // All active fires persist until suppressed, including inside firebreaks.
+  t.fuel=Math.max(.03,t.fuel-dt*rate*(.8+t.fire));
+  const fire=fireBehavior(t);
+  t.fire=Math.min(fire.peak,t.fire+dt*fire.growth);
 }}if(!freezeSpread)spreadFire(dt,heat);
 for(let h of homes)if(!h.burnt){let t=at(h.x,h.y);if(t.fire>.05||t.burnt){h.hp=t.burnt?0:h.hp-dt*18*t.fire;if(h.hp<=0){h.burnt=true;msg('Structure lost! Protect the remaining homes.')}}}const hasFire=tiles.some(t=>t.fire>.02);if(!hasFire)perimeterPlans=[];else updateStructureRisk();for(const u of units)updateUnit(u,dt,hasFire);for(let b of buildings){if(b.type==='water')for(let u of units)if(!isAir(u)&&dist(b.x,b.y,u.x,u.y)<78)u.water=Math.min(u.capacity,u.water+dt*12)}particles=particles.filter(p=>(p.life-=dt)>0);fireTotal=tiles.reduce((s,t)=>s+(t.fire>.02?1:0),0);const destroyed=homes.filter(h=>h.burnt).length;if(destroyed>=5){end()}
 else if(fireTotal===0){
