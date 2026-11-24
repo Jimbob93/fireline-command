@@ -448,7 +448,7 @@ const u=units[i],container=$('units');
 let b=container.children[i];
 if(!b){b=document.createElement('button');b.type='button';b.dataset.unit=i;b.onclick=(event)=>{selectUnits([i],event.shiftKey);refreshUI()};container.appendChild(b)}
 b.className='unit'+(selectedGroup.has(i)?' active':'');b.disabled=u.health<=0;b.setAttribute('aria-pressed',selectedGroup.has(i));
-const status=u.health<=0?'Destroyed':u.type==='tender'&&u.mode!=='retreat'?(u.tenderStatus||'Ready for dispatch'):u.type==='chief'&&u.mode!=='retreat'?(u.chiefStatus||'Ready for dispatch'):u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
+const status=u.health<=0?'Destroyed':u.type==='tender'&&u.mode!=='retreat'?(u.tenderStatus||'Ready for dispatch'):u.type==='chief'&&u.mode!=='retreat'?(u.chiefStatus||'Ready for dispatch'):u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.detourUntil>elapsed?'Cutting around fire':u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
 const value=u.type==='tanker'?'Retardant '+Math.round(100*u.water/u.capacity)+'%':u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
 const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
 if(b.innerHTML!==html)b.innerHTML=html;
@@ -774,7 +774,7 @@ function moveUnit(u,step,airStop=7){
     u.routeRetry=0;
   }
   const cutting=u.type==='dozer'&&(u.mode==='break'||u.mode==='perimeter'&&u.cuttingPerimeter);
-  if(cutting&&!u.route?.length&&advance(u.tx,u.ty,7))return;
+  if(cutting&&!u.route?.length&&goal&&current&&Math.abs(goal.x-current.x)+Math.abs(goal.y-current.y)<=1&&advance(u.tx,u.ty,7))return;
   if(!u.route?.length&&elapsed>=(u.routeRetry||0)){
     u.route=groundRoute(current,goal,u.tx,u.ty,u.type);
     u.routeRetry=elapsed+.4;
@@ -790,6 +790,57 @@ function moveUnit(u,step,airStop=7){
   }
 }
 
+function dozerLineSafe(t){
+  if(!t||t.fire>.02||t.structure||t.airport||buildings.some(b=>positionTile(b.x,b.y)===t))return false;
+  if(t.water&&!t.bridge)return false;
+  let risk=0;for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++){const f=at(t.x+x,t.y+y);if(f?.fire>.02)risk+=f.fire/(1+Math.hypot(x,y));}
+  return risk<1.8;
+}
+// Find a connected cutting route on the outside of the planned perimeter.
+function dozerDetour(start,goal,segment){
+  if(!start||!dozerLineSafe(goal))return null;
+  const ax=segment.start.tx/C-.5,ay=segment.start.ty/C-.5;
+  const dx=Math.sign(segment.end.tx-segment.start.tx),dy=Math.sign(segment.end.ty-segment.start.ty);
+  const outward=t=>(t.x-ax)*dy-(t.y-ay)*dx;
+  const queue=[start],parent=new Map([[start,null]]);
+  for(let i=0;i<queue.length;i++){
+    const t=queue[i];
+    if(t===goal){const path=[];for(let p=t;p!==start;p=parent.get(p))path.push(p);return path.reverse();}
+    for(const [x,y] of spreadNeighbors.slice(0,4)){
+      const n=at(t.x+x,t.y+y);
+      if(!n||parent.has(n)||!dozerLineSafe(n)||outward(n)<Math.min(0,outward(start),outward(goal))||Math.abs(n.x-start.x)+Math.abs(n.y-start.y)>32)continue;
+      parent.set(n,t);queue.push(n);
+    }
+  }
+  return null;
+}
+function adaptDozerLine(u,force=false){
+  const segment=u.perimeter;if(!segment)return false;
+  const i=u.perimeterPoint,point=segment.points[i];
+  if(!point)return false;
+  const goal=positionTile(point.tx,point.ty);
+  if(!force&&dozerLineSafe(goal))return false;
+  if(elapsed<(u.detourAt||0))return false;
+  u.detourAt=elapsed+.35;
+  const start=i>0?positionTile(segment.points[i-1].tx,segment.points[i-1].ty):positionTile(u.x,u.y);
+  for(let j=i;j<segment.points.length;j++){
+    const p=segment.points[j],end=positionTile(p.tx,p.ty);
+    if(!dozerLineSafe(end))continue;
+    const path=dozerDetour(start,end,segment);
+    if(!path?.length)continue;
+    const points=path.map(t=>({tx:t.x*C+C/2,ty:t.y*C+C/2}));
+    segment.points.splice(i,j-i+1,...points);
+    u.route=null;u.routeGoal=null;u.routeRetry=0;u.lineWatch=null;
+    Object.assign(u,segment.points[i]);u.detourUntil=elapsed+8;
+    msg(u.name+' cutting a connected detour around the fire.');
+    return true;
+  }
+  // A blocked corner or completely closed route needs a fresh perimeter.
+  const plan=u.perimeterPlan;
+  if(plan){perimeterPlans=perimeterPlans.filter(p=>p!==plan);for(const v of units)if(v.perimeterPlan===plan&&v.mode==='perimeter'){v.perimeter=null;v.perimeterPlan=null;v.mode='move';v.tx=v.x;v.ty=v.y;v.route=null;v.perimeterDelay=0;}}
+  else{u.perimeter=null;u.mode='move';u.tx=u.x;u.ty=u.y;}
+  return true;
+}
 function rerouteStalledDozer(u,dt){
   if(u.type!=='dozer'||(u.mode!=='perimeter'&&u.mode!=='break')){
     u.lineWatch=null;
@@ -802,6 +853,7 @@ function rerouteStalledDozer(u,dt){
   }
   watch.seconds+=dt;
   if(watch.seconds<3)return false;
+  if(u.mode==='perimeter'&&adaptDozerLine(u,true))return true;
   if(u.perimeter)u.perimeter.retryAt=elapsed+12;
   u.perimeter=null;
   u.lineWatch=null;
@@ -933,7 +985,7 @@ function groundSafety(u,dt,perks){
   }return risk;};
   if(u.mode!=='retreat'&&cell.fire<=.02&&(u.health>45||danger(cell)<.6)&&danger(cell)<2.4)return false;
   if(u.mode!=='retreat'){
-    if(u.perimeter)u.perimeter.retryAt=elapsed+8;
+    if(u.perimeter){u.perimeter.retryAt=elapsed+3;}
     u.perimeter=null;u.lineWatch=null;u.route=null;u.routeGoal=null;
     u.safetyResume={mode:u.capacity?'auto':'move'};
     u.mode='retreat';u.safetyUntil=elapsed+3;u.safetyCheck=0;
@@ -1047,6 +1099,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
       !u.route?.length&&positionTile(u.x,u.y)!==positionTile(u.tx,u.ty))){
     sendForWater(u);
   }
+  if(u.type==='dozer'&&u.mode==='perimeter')adaptDozerLine(u);
   moveUnit(u,perks.speed*dt*(isWaterAir(u)&&u.mode==='auto'&&u.heliOrbit&&dist(u.x,u.y,u.heliOrbit.fire.x*C+C/2,u.heliOrbit.fire.y*C+C/2)<range? .65:1));
   const arrived=dist(u.x,u.y,u.tx,u.ty)<=8;
   if(!arrived&&rerouteStalledDozer(u,dt))return;
