@@ -61,7 +61,7 @@ button:focus-visible{outline:2px solid #ffd27c;outline-offset:2px}
 /* The hidden attribute must override layout display rules. */
 #cheatGate[hidden],#cheatMenu[hidden]{display:none!important}
 #cheatError{min-height:1.3em}
-</style></head><body><div class="shell"><div class="top"><div><div class="tag">WILDFIRE RESPONSE SIMULATOR</div><div class="brand">🔥 FIRELINE COMMAND</div></div><div class="metrics"><div class="metric"><small>Structures saved</small><strong id="saved">0 / 12</strong></div><div class="metric"><small>Burning acres</small><strong id="burning">0</strong></div><div class="metric"><small>Base funds</small><strong id="funds">$700</strong></div><div class="metric"><small>Income / sec</small><strong id="income">+$1.2</strong></div><div class="metric"><small>Incident</small><strong id="wave">1</strong></div><div class="metric"><small>Time</small><strong id="clock">00:00</strong></div></div></div><div class="layout"><div><div class="mapwrap" id="mapwrap"><canvas id="map" width="2000" height="1300" aria-label="Firefighting strategy game map"></canvas><div class="overlay" id="overlay"><div class="overlay-inner"><div class="big">🚒🌲</div><h1 id="overlayTitle">HOLD THE FIRELINE</h1><p id="overlayText">Protect at least 8 of 12 homes as wildfire incidents get harder.</p><button class="primary" id="start" style="padding:15px 30px;font-size:16px">START INCIDENT</button></div></div></div><div class="footer"><div class="legend"><span><i class="dot" style="background:#e95730"></i>Fire</span><span><i class="dot" style="background:#76b9ee"></i>Water</span><span><i class="dot" style="background:#d7d2ab"></i>Firebreak</span><span><i class="dot" style="background:#f0d9ad"></i>Homes</span></div><div><button id="pause">⏸ Pause</button> <button id="speed">1× Speed</button> <button id="restart">↻ Restart</button> <button id="fullscreen" type="button">⛶ Fullscreen</button><p id="fullHint" role="status" hidden></p></div></div></div><div class="side"><div class="panel"><h3>Orders</h3><div class="actions"><button data-order="move">➤ Move</button><button data-order="attack" class="selected">💦 Suppress</button><button data-order="break">⛏ Cut Line</button><button data-order="refill">🚰 Refill</button><button data-order="defend" class="wide">🛡 Defend Location</button></div><div id="orderDescription" class="tips" style="margin-top:10px">Move: select a destination for your crew or engine.</div></div><div class="panel"><h3>Cheats</h3>
+</style></head><body><div class="shell"><div class="top"><div><div class="tag">WILDFIRE RESPONSE SIMULATOR</div><div class="brand">🔥 FIRELINE COMMAND</div></div><div class="metrics"><div class="metric"><small>Structures saved</small><strong id="saved">0 / 12</strong></div><div class="metric"><small>Burning acres</small><strong id="burning">0</strong></div><div class="metric"><small>Base funds</small><strong id="funds">$700</strong></div><div class="metric"><small>Income / sec</small><strong id="income">+$1.2</strong></div><div class="metric"><small>Incident</small><strong id="wave">1</strong></div><div class="metric"><small>Time</small><strong id="clock">00:00</strong></div></div></div><div class="layout"><div><div class="mapwrap" id="mapwrap"><canvas id="map" width="2000" height="1300" aria-label="Firefighting strategy game map"></canvas><div class="overlay" id="overlay"><div class="overlay-inner"><div class="big">🚒🌲</div><h1 id="overlayTitle">HOLD THE FIRELINE</h1><p id="overlayText">Protect at least 8 of 12 homes as wildfire incidents get harder.</p><button class="primary" id="start" style="padding:15px 30px;font-size:16px">START INCIDENT</button></div></div></div><div class="footer"><div class="legend"><span><i class="dot" style="background:#e95730"></i>Fire</span><span><i class="dot" style="background:#76b9ee"></i>Water</span><span><i class="dot" style="background:#d7d2ab"></i>Firebreak</span><span><i class="dot" style="background:#f0d9ad"></i>Homes</span></div><div><button id="pause">⏸ Pause</button> <button id="speed">1× Speed</button> <button id="restart">↻ Restart</button> <button id="fullscreen" type="button">⛶ Fullscreen</button><p id="fullHint" role="status" hidden></p></div></div></div><div class="side"><div class="panel"><h3>Incident overview</h3><div id="incidentStats" class="tips" aria-live="off"></div><div class="bar"><i id="containmentBar" style="width:0%"></i></div><div class="tips">Containment is the protected share of active fire tiles, not a real-world perimeter measurement.</div></div><div class="panel"><h3>Orders</h3><div class="actions"><button data-order="move">➤ Move</button><button data-order="attack" class="selected">💦 Suppress</button><button data-order="break">⛏ Cut Line</button><button data-order="refill">🚰 Refill</button><button data-order="defend" class="wide">🛡 Defend Location</button></div><div id="orderDescription" class="tips" style="margin-top:10px">Move: select a destination for your crew or engine.</div></div><div class="panel"><h3>Cheats</h3>
 <button id="toggleCheats" type="button" aria-expanded="false" aria-controls="cheatGate cheatMenu">Open Cheat Menu</button>
 <form id="cheatGate" hidden>
   <div class="xp-control">
@@ -381,7 +381,19 @@ function recruitmentBase(type){
 function unitCost(type){
   return Math.round(types[type].cost*(5+(unitPurchases[type]||0))/5);
 }
+function incidentStats(){
+  const active=tiles.filter(t=>t.fire>.02);
+  const contained=active.filter(t=>t.contained).length;
+  const percent=active.length?Math.round(100*contained/active.length):100;
+  const affected=tiles.filter(t=>t.everBurned||t.fire>.02).length;
+  const threatened=homes.filter(h=>!h.burnt&&active.some(t=>Math.hypot(t.x-h.x,t.y-h.y)<=5)).length;
+  const living=units.filter(u=>u.health>0);
+  return {percent,affected,threatened,deployed:living.filter(u=>!['home','standby','ready','parked'].includes(u.mode)&&!(u.type==='tanker'&&['ready','parked'].includes(u.airportStage))).length,total:living.length};
+}
 function refreshUI(){
+const stats=incidentStats();
+$('incidentStats').textContent='Containment '+stats.percent+'% · Affected acres '+Math.ceil(stats.affected*1.8)+' · Homes threatened '+stats.threatened+' · Resources '+stats.deployed+'/'+stats.total;
+$('containmentBar').style.width=stats.percent+'%';
 const cheatsAvailable=cheatsUnlocked&&started&&!ended;
 $('cheatWater').disabled=!cheatsAvailable;
 $('cheatCash').disabled=!cheatsAvailable;
@@ -410,8 +422,8 @@ const u=units[i],container=$('units');
 let b=container.children[i];
 if(!b){b=document.createElement('button');b.type='button';b.dataset.unit=i;b.onclick=(event)=>{selectUnits([i],event.shiftKey);refreshUI()};container.appendChild(b)}
 b.className='unit'+(selectedGroup.has(i)?' active':'');b.disabled=u.health<=0;b.setAttribute('aria-pressed',selectedGroup.has(i));
-const status=u.health<=0?'Destroyed':u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling'}[u.mode]||'Available');
-const value=u.type==='tanker'?(u.water>=1?'Loaded':'Reloading'):u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
+const status=u.health<=0?'Destroyed':u.type==='tanker'&&u.airportStage&&u.airportStage!=='flight'?({holding:'Holding · waiting for runway',approach:'Cleared to land',landing:'Landing',parked:u.water<u.capacity?'Refilling in parking bay':'Parked at airport',ready:u.runwayQueuedAt!=null?'Waiting for takeoff clearance':'Parked at airport',taxiOut:'Taxiing to runway',taxiPark:'Taxiing to refill bay',takeoff:'Taking off'}[u.airportStage]):u.type==='tanker'&&u.tankerRun?(u.tankerRun.dropping?'Dropping retardant · ':'En route · ')+u.tankerRun.role:u.type==='tanker'&&u.mode==='auto'?'Searching for assignment':({auto:'Auto response',perimeter:u.perimeter?.pass===2?'Widening firebreak · pass 2':'Cutting perimeter · pass 1',home:'Returning to base',standby:'At base',defend:'Defending',attack:'Suppressing',break:'Cutting line',refill:'Refilling',retreat:'Emergency retreat'}[u.mode]||'Available');
+const value=u.type==='tanker'?'Retardant '+Math.round(100*u.water/u.capacity)+'%':u.capacity?'💧'+Math.round(100*u.water/u.capacity)+'%':'';
 const html=`<span class="symbol">${types[u.type].icon}</span><span class="grow"><b>${u.name}</b><small>${status} · HP ${Math.round(u.health)}% · ${u.xp} XP · ${training[rank(u)].label}</small></span><span class="water">${value}</span>`;
 if(b.innerHTML!==html)b.innerHTML=html;
 }
@@ -590,7 +602,9 @@ function planPerimeter(u){
         if(next&&next.fire>.02&&!seen.has(next)){seen.add(next);cluster.push(next);}
       }
     }
-    const bounds=[Math.max(0,left-3),Math.min(COLS-1,right+3),Math.max(0,top-3),Math.min(ROWS-1,bottom+3)];
+    const [,,wx,wy]=windDirections[windDirection];
+    const lead=Math.min(5,Math.floor(windMph/10));
+    const bounds=[Math.max(0,left-3-Math.round(Math.max(0,-wx)*lead)),Math.min(COLS-1,right+3+Math.round(Math.max(0,wx)*lead)),Math.max(0,top-3-Math.round(Math.max(0,-wy)*lead)),Math.min(ROWS-1,bottom+3+Math.round(Math.max(0,wy)*lead))];
     const key=bounds.join(',');
     // Avoid duplicating an unfinished perimeter for an overlapping fire.
     if(perimeterPlans.some(p=>unfinished(p)&&cluster.some(t=>t.x>=p.bounds[0]&&t.x<=p.bounds[1]&&t.y>=p.bounds[2]&&t.y<=p.bounds[3])))return;
@@ -809,6 +823,51 @@ function helicopterAttackCourse(u,fire,dt){
   u.ty=cy+Math.sin(o.angle)*radius;
   return true;
 }
+function groundSafety(u,dt,perks){
+  if(isAir(u)||u.health<=0)return false;
+  const cell=positionTile(u.x,u.y);
+  if(!cell)return false;
+  const danger=t=>{let risk=0;for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++){
+    const f=at(t.x+x,t.y+y);if(f?.fire>.02)risk+=f.fire/(1+Math.hypot(x,y));
+  }return risk;};
+  if(u.mode!=='retreat'&&cell.fire<=.02&&(u.health>45||danger(cell)<.6)&&danger(cell)<2.4)return false;
+  if(u.mode!=='retreat'){
+    if(u.perimeter)u.perimeter.retryAt=elapsed+8;
+    u.perimeter=null;u.lineWatch=null;u.route=null;u.routeGoal=null;
+    u.safetyResume={mode:u.capacity?'auto':'move'};
+    u.mode='retreat';u.safetyUntil=elapsed+3;u.safetyCheck=0;
+    msg(u.name+' retreating from dangerous fire conditions.');
+  }
+  if(elapsed>=(u.safetyCheck||0)){
+    u.safetyCheck=elapsed+1;
+    let best=null,score=Infinity;
+    // Choose a safe reachable tile, preferring roads and existing cleared ground.
+    for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){
+      const t=at(cell.x+x,cell.y+y);
+      if(!groundPassable(t))continue;
+      const risk=danger(t);
+      const value=risk*80+Math.hypot(x,y)*3-(t.road||t.cutLine?4:0);
+      if(value<score){score=value;best=t;}
+    }
+    if(best){u.tx=best.x*C+C/2;u.ty=best.y*C+C/2;}
+    if(elapsed>=u.safetyUntil&&cell.fire<=.02&&danger(cell)<.35){
+      u.mode=u.safetyResume?.mode||'move';u.tx=u.x;u.ty=u.y;u.safetyResume=null;return false;
+    }
+  }
+  if(cell.fire>.02)u.health=Math.max(0,u.health-dt*(4+12*cell.fire));
+  moveUnit(u,perks.speed*dt*1.15);return true;
+}
+function groundPriority(u,t){
+  const d=dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2);
+  const risk=structureRisk.get(t)||0;
+  return -d+(u.type==='engine'?risk*1.5:u.type==='crew'?(t.contained?180:0)+risk*.35:0);
+}
+function groundMission(u,range){
+  let best=null,score=-Infinity;
+  for(const t of tiles){if(t.fire<=.02||dist(u.x,u.y,t.x*C+C/2,t.y*C+C/2)>=range)continue;
+    const value=groundPriority(u,t);if(value>score){best=t;score=value;}
+  }return best;
+}
 function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   if(u.health<=0)return;
 
@@ -825,6 +884,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
   u.cooldown-=dt;
   const perks=unitPerks(u);
   if(u.type==='tanker'){updateAirportTanker(u,dt,perks,hasFire);return;}
+  if(hasFire&&groundSafety(u,dt,perks))return;
   if(hasFire){
     u.recalled=false;
     if((u.mode==='standby'||u.mode==='home'&&!u.homeBase)&&!u.repairing)u.mode=u.capacity?'auto':'move';
@@ -864,7 +924,7 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
       u.heliTarget=fire;
       if(!helicopterAttackCourse(u,fire,dt)){u.tx=u.x;u.ty=u.y;}
     }else{
-      const fire=nearestFire(u,420,undefined,true);
+      const fire=groundMission(u,420);
       const chase=fire&&dist(u.x,u.y,fire.x*C+12,fire.y*C+12)>range*.8;
       u.tx=chase?fire.x*C+12:u.x;
       u.ty=chase?fire.y*C+12:u.y;
@@ -1213,7 +1273,8 @@ function clearFirebreak(u,radius){
 }
 
 function spreadFire(dt,heat){
-  const spreadRate=dt*.045*(1+.78*heat);
+  const daylight=.5+.5*Math.cos((elapsed%240)/240*TWO);
+  const spreadRate=dt*.045*(1+.78*heat)*(.78+.44*daylight);
   for(const source of tiles){
     if(source.fire<=.25)continue;
     for(const [dx,dy] of spreadNeighbors){
@@ -1327,6 +1388,7 @@ function drawWaterDropFlight(){
 }
 
 function update(dt){const heat=difficulty();elapsed+=dt;funds+=dt*income();waveTimer+=dt;updateWind();updateWaterDrop(dt);if(containmentDirty)checkContainment();for(let t of tiles){if(t.wet>0)t.wet=Math.max(0,t.wet-dt);if(t.retardant>0)t.retardant=Math.max(0,t.retardant-dt);if(t.fire>.02){
+  t.everBurned=true;
   const rate=t.wet>0?.07:.12;
   // All active fires persist until suppressed, including inside firebreaks.
   t.fuel=Math.max(.03,t.fuel-dt*rate*(.8+t.fire));
