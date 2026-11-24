@@ -594,7 +594,12 @@ function planPerimeter(u){
       const corners=[[west,north],[east,north],[east,south],[west,south]].map(([x,y])=>({tx:x*C+C/2,ty:y*C+C/2}));
       let entry=0;
       for(let i=1;i<4;i++)if(dist(u.x,u.y,corners[i].tx,corners[i].ty)<dist(u.x,u.y,corners[entry].tx,corners[entry].ty))entry=i;
-      for(let i=0;i<4;i++)segments.push({start:corners[(entry+i)%4],end:corners[(entry+i+1)%4],done:false,pass});
+      for(let i=0;i<4;i++){
+        const start=corners[(entry+i)%4],end=corners[(entry+i+1)%4];
+        const count=Math.round(dist(start.tx,start.ty,end.tx,end.ty)/C);
+        const points=Array.from({length:count+1},(_,j)=>({tx:start.tx+(end.tx-start.tx)*(count?j/count:0),ty:start.ty+(end.ty-start.ty)*(count?j/count:0)}));
+        segments.push({start,end,points,done:false,pass});
+      }
     };
     addRing(bounds,1);
     addRing([Math.max(0,bounds[0]-1),Math.min(COLS-1,bounds[1]+1),Math.max(0,bounds[2]-1),Math.min(ROWS-1,bounds[3]+1)],2);
@@ -603,6 +608,7 @@ function planPerimeter(u){
   const segment=available(plan);
   if(!segment)return;
   u.perimeter=segment;u.mode='perimeter';u.cuttingPerimeter=false;u.lineWatch=null;
+  u.perimeterPoint=0;u.route=null;u.routeGoal=null;
   Object.assign(u,segment.start);
   if(segment.pass===2&&!plan.wideningAnnounced){plan.wideningAnnounced=true;msg(u.name+' widening firebreak with a second perimeter pass.');}
 }
@@ -802,17 +808,25 @@ function updateUnit(u,dt,hasFire=tiles.some(t=>t.fire>.02)){
       msg(u.name+(u.type==='tanker'?' reloaded.':' fully refilled.'));
     }
   }else if(u.mode==='perimeter'){
-    if(u.cuttingPerimeter)clearFirebreak(u,perks.cutRadius);
+    // Cut only at the planned tile centers, not along detours to them.
     if(arrived){
-      if(u.cuttingPerimeter){
-        u.perimeter.done=true;
-        u.perimeter=null;
-        u.perimeterDelay=0;
-        u.mode='move';
-      }else{
+      const segment=u.perimeter;
+      const point=segment.points[u.perimeterPoint];
+      if(positionTile(u.x,u.y)===positionTile(point.tx,point.ty)){
         u.cuttingPerimeter=true;
         clearFirebreak(u,perks.cutRadius);
-        Object.assign(u,u.perimeter.end);
+        const tile=positionTile(point.tx,point.ty);
+        const protectedTile=tile&&(tile.break||tile.water||tile.road||tile.airport);
+        if(!protectedTile){
+          segment.retryAt=elapsed+12;
+          u.perimeter=null;u.mode='move';u.perimeterDelay=0;
+          u.tx=u.x;u.ty=u.y;
+        }else if(++u.perimeterPoint>=segment.points.length){
+          segment.done=true;u.perimeter=null;u.perimeterDelay=0;u.mode='move';
+        }else{
+          Object.assign(u,segment.points[u.perimeterPoint]);
+          u.route=null;u.routeGoal=null;
+        }
       }
     }
   }else if(u.mode==='home'&&arrived){
